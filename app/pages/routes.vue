@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ROUTES, type AirportCode, type CabinClass, type FareType, type Route } from "~~/shared/routes";
 import { AIRPORTS } from "~~/shared/airports";
+import { FARE_CHANGE_DATE } from "~~/shared/pp";
 
 const hub = ref<AirportCode>("HND");
 const cabin = ref<CabinClass>("economy");
@@ -56,6 +57,14 @@ const routes = computed<NormalizedRoute[]>(() => {
     </div>
   </div>
 
+  <aside class="fare-banner" role="note">
+    <span class="badge">NEW</span>
+    <div class="msg">
+      <strong>2026/5/19 搭乗分〜の新運賃</strong> で試算しています
+      <span class="sub">エコノミー シンプル = 70% / +100、プレミアム スタンダード = 130% / +400 など</span>
+    </div>
+  </aside>
+
   <div class="tabs hub-tabs">
     <button
       v-for="h in HUBS"
@@ -76,12 +85,13 @@ const routes = computed<NormalizedRoute[]>(() => {
         :route="r"
         :cabin="cabin"
         :fare-type="fareType"
+        :flown-at="FARE_CHANGE_DATE"
         :from="r.displayFrom"
         :to="r.displayTo"
       />
     </div>
     <p class="note">
-      ※ 現在の日付に対応する運賃体系（〜2026/5/18 は旧、2026/5/19〜 は新）で試算しています。実際の積算PPは予約クラス・搭乗ポイント設定により変動します。
+      ※ 実際の積算PPは予約クラス・搭乗ポイント設定により変動します。出典: <a href="https://www.ana.co.jp/amcservice/pps/dom_unchin_list.html" target="_blank" rel="noopener">ANA国内線利用運賃一覧表</a>
     </p>
   </div>
 </template>
@@ -113,6 +123,45 @@ const routes = computed<NormalizedRoute[]>(() => {
 .cabin-label {
   font-size: 12px;
   color: var(--ink-mute);
+}
+.fare-banner {
+  margin: 0 28px 18px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ink);
+  background: var(--surface, #fafaf7);
+  border-radius: 6px;
+  @media (min-width: 768px) {
+    margin: 0 48px 22px;
+    padding: 14px 20px;
+  }
+}
+.fare-banner .badge {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  padding: 3px 7px;
+  background: var(--ink);
+  color: var(--bg, #fff);
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.fare-banner .msg {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.fare-banner .msg strong {
+  font-weight: 600;
+}
+.fare-banner .msg .sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.02em;
 }
 .hub-tabs {
   padding: 0 28px;
