@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ANA PP Tracker — UI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+JP:wght@300;350;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { background: #2a2a26; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="data.js"></script>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="screens.jsx"></script>
+  <script type="text/babel">
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
+      <DesignCanvas title="ANA PP Tracker — UI mockups" subtitle="Editorial · aviation ledger feel · FY2026">
+        <DCSection id="auth" title="01 / Authentication">
+          <DCArtboard id="login" label="ログイン" width={1440} height={900}>
+            <LoginScreen />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="desktop" title="02 / Desktop · main flows">
+          <DCArtboard id="dashboard" label="ダッシュボード — 目標までの距離を一目で" width={1440} height={1080}>
+            <DashboardScreen />
+          </DCArtboard>
+          <DCArtboard id="routes" label="路線テーブル — 拠点 × クラスで切替" width={1440} height={980}>
+            <RoutesScreen />
+          </DCArtboard>
+          <DCArtboard id="flights" label="フライト履歴 — レビュー込み台帳" width={1440} height={980}>
+            <FlightsScreen />
+          </DCArtboard>
+          <DCArtboard id="new-flight" label="新規登録 — リアルタイムPP計算" width={1440} height={1100}>
+            <NewFlightScreen />
+          </DCArtboard>
+          <DCArtboard id="import" label="CSVインポート — エラー行をその場で可視化" width={1440} height={1000}>
+            <ImportScreen />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="mobile" title="03 / Mobile">
+          <DCArtboard id="mobile-dashboard" label="モバイル · ダッシュボード" width={390} height={844}>
+            <MobileDashboardScreen />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+    );
+  </script>
+</body>
+</html>

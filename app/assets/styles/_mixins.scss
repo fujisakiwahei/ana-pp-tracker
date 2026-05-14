@@ -1,0 +1,27 @@
+@use "sass:map";
+@use "./tokens" as *;
+
+$breakpoints: (
+  sm: $bp-sm,
+  md: $bp-md,
+  lg: $bp-lg,
+  xl: $bp-xl,
+);
+
+@mixin respond-to($name) {
+  $value: map.get($breakpoints, $name);
+  @if $value {
+    @media (min-width: $value) {
+      @content;
+    }
+  }
+}
+
+@mixin respond-below($name) {
+  $value: map.get($breakpoints, $name);
+  @if $value {
+    @media (max-width: ($value - 1px)) {
+      @content;
+    }
+  }
+}

@@ -1,0 +1,440 @@
+<script setup lang="ts">
+import { toTypedSchema } from "@vee-validate/zod";
+import { flightInputSchema, type FlightInput } from "~~/shared/schema";
+import type { AirportCode, CabinClass } from "~~/shared/routes";
+import { AIRPORTS, AIRPORT_CODES } from "~~/shared/airports";
+
+const props = defineProps<{
+  initialValues?: Partial<FlightInput>;
+  submitLabel?: string;
+  busy?: boolean;
+  showDelete?: boolean;
+}>();
+const emit = defineEmits<{
+  submit: [v: FlightInput];
+  cancel: [];
+  delete: [];
+}>();
+
+const today = new Date().toISOString().slice(0, 10);
+
+const { handleSubmit, values, errors, defineField, resetForm } = useForm<FlightInput>({
+  validationSchema: toTypedSchema(flightInputSchema),
+  initialValues: {
+    flown_at: today,
+    flight_number: "",
+    from_airport: "HND",
+    to_airport: "OKA",
+    cabin: "first",
+    fare_type: "simple",
+    pp: undefined,
+    aircraft: "",
+    seat: "",
+    lounge: "",
+    rating_seat: undefined,
+    rating_aircraft: undefined,
+    rating_lounge: undefined,
+    notes: "",
+    ...(props.initialValues ?? {}),
+  },
+});
+
+watch(
+  () => props.initialValues,
+  (v) => {
+    if (v) resetForm({ values: { ...values, ...v } as FlightInput });
+  },
+);
+
+const [flownAt, flownAtAttrs] = defineField("flown_at");
+const [flightNumber, flightNumberAttrs] = defineField("flight_number");
+const [fromAirport, fromAirportAttrs] = defineField("from_airport");
+const [toAirport, toAirportAttrs] = defineField("to_airport");
+const [cabin] = defineField("cabin");
+const [fareType, fareTypeAttrs] = defineField("fare_type");
+const [pp, ppAttrs] = defineField("pp");
+const [aircraft, aircraftAttrs] = defineField("aircraft");
+const [seat, seatAttrs] = defineField("seat");
+const [lounge, loungeAttrs] = defineField("lounge");
+const [ratingSeat] = defineField("rating_seat");
+const [ratingAircraft] = defineField("rating_aircraft");
+const [ratingLounge] = defineField("rating_lounge");
+const [notes, notesAttrs] = defineField("notes");
+
+const { route, pp: autoPP } = usePPCalc(
+  () => fromAirport.value as AirportCode | undefined,
+  () => toAirport.value as AirportCode | undefined,
+  () => cabin.value as CabinClass | undefined,
+);
+
+const ppDisplay = computed(() => autoPP.value ?? 0);
+const summary = useFetch<{ totalPP: number; goalPP: number }>(
+  "/api/stats/summary",
+  { lazy: true, default: () => ({ totalPP: 0, goalPP: 50000 }) },
+);
+
+const projectedTotal = computed(() => {
+  const t = summary.data.value?.totalPP ?? 0;
+  return t + (pp.value ?? autoPP.value ?? 0);
+});
+const projectedPct = computed(() => {
+  const goal = summary.data.value?.goalPP ?? 50000;
+  return ((pp.value ?? autoPP.value ?? 0) / goal) * 100;
+});
+
+const FARE_OPTIONS = [
+  { value: "flex", label: "フレックス" },
+  { value: "biz", label: "Biz" },
+  { value: "standard", label: "スタンダード" },
+  { value: "simple", label: "シンプル" },
+  { value: "sale", label: "セール" },
+  { value: "ana_card", label: "ANAカード優待割引" },
+  { value: "stockholder", label: "株主優待割引" },
+  { value: "shimin", label: "島民割引" },
+];
+
+const fareRate = computed(() => (cabin.value === "first" ? "120%" : "80%"));
+const fareBonus = computed(() => (cabin.value === "first" ? 400 : 200));
+
+const onSubmit = handleSubmit((v) => emit("submit", v));
+</script>
+
+<template>
+  <form class="flight-form" @submit="onSubmit">
+    <div class="cols">
+      <div class="main">
+        <fieldset>
+          <legend class="eyebrow">Itinerary</legend>
+          <div class="grid-3">
+            <div class="field">
+              <label class="field-label">搭乗日</label>
+              <input
+                class="input mono"
+                type="date"
+                v-model="flownAt"
+                v-bind="flownAtAttrs"
+              />
+              <p v-if="errors.flown_at" class="field-error">{{ errors.flown_at }}</p>
+            </div>
+            <div class="field">
+              <label class="field-label">便名</label>
+              <input
+                class="input mono"
+                placeholder="NH256"
+                v-model="flightNumber"
+                v-bind="flightNumberAttrs"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label">運賃種別</label>
+              <select class="select" v-model="fareType" v-bind="fareTypeAttrs">
+                <option value="">—</option>
+                <option v-for="o in FARE_OPTIONS" :key="o.value" :value="o.value">
+                  {{ o.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend class="eyebrow">Route</legend>
+          <div class="grid-route">
+            <div class="field">
+              <label class="field-label">出発</label>
+              <select class="select" v-model="fromAirport" v-bind="fromAirportAttrs">
+                <option v-for="c in AIRPORT_CODES" :key="c" :value="c">
+                  {{ c }} · {{ AIRPORTS[c].name }}
+                </option>
+              </select>
+              <p v-if="errors.from_airport" class="field-error">{{ errors.from_airport }}</p>
+            </div>
+            <span class="arrow">→</span>
+            <div class="field">
+              <label class="field-label">到着</label>
+              <select class="select" v-model="toAirport" v-bind="toAirportAttrs">
+                <option v-for="c in AIRPORT_CODES" :key="c" :value="c">
+                  {{ c }} · {{ AIRPORTS[c].name }}
+                </option>
+              </select>
+              <p v-if="errors.to_airport" class="field-error">{{ errors.to_airport }}</p>
+            </div>
+          </div>
+          <div class="cabin-row">
+            <label class="field-label">クラス</label>
+            <Segmented
+              v-model="cabin"
+              :options="[
+                { value: 'economy', label: 'Economy' },
+                { value: 'first', label: 'First' },
+              ]"
+            />
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend class="eyebrow">Aircraft &amp; seat</legend>
+          <div class="grid-3">
+            <div class="field">
+              <label class="field-label">機体</label>
+              <input class="input" placeholder="B787-9" v-model="aircraft" v-bind="aircraftAttrs" />
+            </div>
+            <div class="field">
+              <label class="field-label">座席</label>
+              <input class="input mono" placeholder="1A" v-model="seat" v-bind="seatAttrs" />
+            </div>
+            <div class="field">
+              <label class="field-label">ラウンジ</label>
+              <input class="input" placeholder="ANA LOUNGE 羽田" v-model="lounge" v-bind="loungeAttrs" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend class="eyebrow">Review</legend>
+          <div class="grid-3 ratings">
+            <div class="field">
+              <label class="field-label">座席</label>
+              <RatingStars
+                interactive
+                :value="ratingSeat ?? null"
+                @update:value="(v: number | null) => (ratingSeat = v ?? undefined)"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label">機体</label>
+              <RatingStars
+                interactive
+                :value="ratingAircraft ?? null"
+                @update:value="(v: number | null) => (ratingAircraft = v ?? undefined)"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label">ラウンジ</label>
+              <RatingStars
+                interactive
+                :value="ratingLounge ?? null"
+                @update:value="(v: number | null) => (ratingLounge = v ?? undefined)"
+              />
+            </div>
+          </div>
+          <div class="field memo">
+            <label class="field-label">メモ</label>
+            <textarea
+              class="textarea"
+              placeholder="搭乗の振り返り、機内サービスの感想など"
+              v-model="notes"
+              v-bind="notesAttrs"
+            />
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="submit" class="btn" :disabled="busy">
+            {{ submitLabel ?? "記録する" }}
+          </button>
+          <button type="button" class="btn btn-ghost" @click="emit('cancel')">
+            キャンセル
+          </button>
+          <button
+            v-if="showDelete"
+            type="button"
+            class="btn btn-danger delete"
+            :disabled="busy"
+            @click="emit('delete')"
+          >
+            削除
+          </button>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="card pp-card">
+          <div class="eyebrow">Auto-calculated</div>
+          <div class="card-title display italic">今回の搭乗で加算されるPP</div>
+          <div class="big">
+            <span class="num mono">{{ ppDisplay.toLocaleString() }}</span>
+            <span class="unit display italic">PP</span>
+          </div>
+          <hr class="divider" />
+          <table>
+            <tbody>
+              <tr><td class="lbl">区間</td><td class="val">{{ fromAirport }} → {{ toAirport }}</td></tr>
+              <tr><td class="lbl">基本マイル</td><td class="val">{{ route?.baseMiles?.toLocaleString() ?? "—" }}</td></tr>
+              <tr><td class="lbl">積算率</td><td class="val">{{ fareRate }}</td></tr>
+              <tr><td class="lbl">路線倍率</td><td class="val">×2</td></tr>
+              <tr><td class="lbl">搭乗ポイント</td><td class="val">+{{ fareBonus }}</td></tr>
+            </tbody>
+          </table>
+          <p class="note">
+            シンプル運賃を前提に試算しています。実績と差がある場合は下の欄に実際のPPを入力して上書きできます。
+          </p>
+          <div class="field override">
+            <label class="field-label">PP(手入力で上書き)</label>
+            <input
+              class="input mono"
+              type="number"
+              :placeholder="String(ppDisplay)"
+              v-model="pp"
+              v-bind="ppAttrs"
+            />
+            <p v-if="errors.pp" class="field-error">{{ errors.pp }}</p>
+          </div>
+        </div>
+
+        <div class="projected">
+          <div>
+            <div class="eyebrow">記録後の累計</div>
+            <div class="mono total">
+              {{ projectedTotal.toLocaleString() }} / {{ (summary.data.value?.goalPP ?? 50000).toLocaleString() }}
+            </div>
+          </div>
+          <div class="mono delta">+{{ projectedPct.toFixed(1) }}%</div>
+        </div>
+      </aside>
+    </div>
+  </form>
+</template>
+
+<style lang="scss" scoped>
+.cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  @media (min-width: 1024px) {
+    grid-template-columns: 1.4fr 1fr;
+    gap: 56px;
+  }
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+legend.eyebrow {
+  margin-bottom: 14px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  @media (min-width: 600px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+.grid-route {
+  display: grid;
+  grid-template-columns: 1fr 24px 1fr;
+  gap: 18px;
+  align-items: end;
+}
+.grid-route .arrow {
+  padding-bottom: 12px;
+  text-align: center;
+  color: var(--ink-mute);
+}
+.cabin-row {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ratings {
+  margin-bottom: 22px;
+}
+.memo {
+  margin-top: 8px;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.delete {
+  margin-left: auto;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-self: start;
+  position: sticky;
+  top: 16px;
+}
+.pp-card {
+  padding: 26px 26px 28px;
+}
+.card-title {
+  font-size: 22px;
+  margin-top: 6px;
+  color: var(--ink-soft);
+}
+.big {
+  margin-top: 18px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.num {
+  font-size: 64px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.unit {
+  font-size: 20px;
+  color: var(--ink-mute);
+}
+hr.divider {
+  margin: 22px 0;
+}
+table {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  border-collapse: collapse;
+}
+.lbl {
+  padding: 5px 0;
+  color: var(--ink-mute);
+}
+.val {
+  padding: 5px 0;
+  text-align: right;
+}
+.note {
+  margin-top: 16px;
+  font-size: 10.5px;
+  color: var(--ink-mute);
+  line-height: 1.6;
+}
+.override {
+  margin-top: 18px;
+}
+
+.projected {
+  padding: 18px 22px;
+  border: 1px dashed var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.total {
+  font-size: 18px;
+  margin-top: 4px;
+}
+.delta {
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.05em;
+}
+</style>
