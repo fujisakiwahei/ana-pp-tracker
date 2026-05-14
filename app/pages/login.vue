@@ -47,7 +47,6 @@ async function submit() {
   <div class="login">
     <aside class="editorial">
       <div class="top">
-        <div class="eyebrow inv">Premium Point Ledger</div>
         <h1 class="display italic title">
           PP Ledger
         </h1>
@@ -56,16 +55,19 @@ async function submit() {
         </p>
       </div>
       <div class="bottom">
-        <span class="mono ver">FY2026 · v0.1</span>
-        <span class="display italic goal">50,000 PP → Platinum</span>
+        <span class="goal-jp">プラチナまで 50,000 PP</span>
       </div>
     </aside>
     <section class="form-pane">
       <div class="form-inner">
-        <div class="eyebrow">{{ mode === "signin" ? "Sign in" : "Sign up" }}</div>
         <h2 class="display italic heading">
           {{ mode === "signin" ? "おかえりなさい" : "アカウントを作る" }}
         </h2>
+        <p class="lede-jp">
+          {{ mode === "signin"
+            ? "登録済みのメールアドレスとパスワードでサインインしてください。"
+            : "メールアドレスとパスワード(6文字以上)を入力してください。" }}
+        </p>
         <form class="form" @submit.prevent="submit">
           <div class="field">
             <label class="field-label">メールアドレス</label>
@@ -83,29 +85,34 @@ async function submit() {
             <input
               class="input"
               type="password"
-              autocomplete="current-password"
+              :autocomplete="mode === 'signin' ? 'current-password' : 'new-password'"
               placeholder="••••••••"
               v-model="password"
               required
               minlength="6"
             />
+            <p v-if="mode === 'signup'" class="hint">
+              6文字以上で設定してください。
+            </p>
           </div>
           <p v-if="error" class="error mono">{{ error }}</p>
           <button class="btn submit" type="submit" :disabled="busy">
-            {{ busy ? "..." : mode === "signin" ? "サインイン" : "アカウント作成" }}
+            {{ busy ? "送信中…" : mode === "signin" ? "サインイン" : "アカウント作成" }}
           </button>
         </form>
         <div class="toggle">
           <button
             type="button"
             class="btn-link"
-            @click="mode = mode === 'signin' ? 'signup' : 'signin'"
+            @click="mode = mode === 'signin' ? 'signup' : 'signin'; error = ''"
           >
-            {{ mode === "signin" ? "アカウントを作る" : "サインインに戻る" }}
+            {{ mode === "signin"
+              ? "はじめての方はこちら(新規登録)"
+              : "サインインに戻る" }}
           </button>
         </div>
         <p class="note">
-          個人用のアプリのため、新規登録は管理者からの招待制を想定しています。
+          このアプリは個人専用です。フライト記録はあなた自身しか見られません。
         </p>
       </div>
     </section>
@@ -133,8 +140,21 @@ async function submit() {
     padding: 56px 64px;
   }
 }
-.eyebrow.inv {
-  color: color-mix(in srgb, var(--paper) 60%, transparent);
+.lede-jp {
+  font-size: 13px;
+  color: var(--ink-mute);
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+.hint {
+  font-size: 11px;
+  color: var(--ink-mute);
+  margin-top: 6px;
+}
+.goal-jp {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--gold);
 }
 .title {
   font-size: 48px;

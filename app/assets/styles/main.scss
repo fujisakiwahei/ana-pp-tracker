@@ -321,6 +321,7 @@
   text-transform: uppercase;
   color: var(--ink-soft);
   background: var(--paper-soft);
+  white-space: nowrap;
 }
 .pill.gold {
   color: var(--gold);
@@ -419,14 +420,12 @@
   font-size: 13px;
 }
 .tbl thead th {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-mute);
-  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  font-weight: 600;
   text-align: left;
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--line);
 }
 .tbl tbody td {

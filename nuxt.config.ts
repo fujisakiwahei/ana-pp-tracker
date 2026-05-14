@@ -4,6 +4,8 @@ export default defineNuxtConfig({
 
   modules: ["@nuxtjs/supabase", "@vee-validate/nuxt"],
 
+  components: [{ path: "~/components", pathPrefix: false }],
+
   app: {
     head: {
       title: "PP Ledger — ANA Domestic",

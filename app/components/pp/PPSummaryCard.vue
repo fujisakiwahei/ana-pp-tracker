@@ -12,7 +12,7 @@ const pct = computed(() => Math.min(100, props.progress * 100));
 
 <template>
   <div class="summary">
-    <div class="eyebrow">YTD Premium Points</div>
+    <div class="lbl">今年の積算PP</div>
     <div class="big">
       <span class="num mono">{{ totalPP.toLocaleString() }}</span>
       <span class="goal display italic">/ {{ goalPP.toLocaleString() }}</span>
@@ -22,22 +22,22 @@ const pct = computed(() => Math.min(100, props.progress * 100));
         <div class="progress-fill" :style="{ width: `${pct}%` }" />
       </div>
       <div class="ticks">
-        <span>0</span>
-        <span>{{ pct.toFixed(1) }}% · Bronze 30k</span>
-        <span>Platinum 50k</span>
+        <span>0 PP</span>
+        <span>達成率 {{ pct.toFixed(1) }}% · ブロンズ 30,000</span>
+        <span>プラチナ 50,000</span>
       </div>
     </div>
     <div class="metrics">
       <div>
-        <div class="eyebrow">目標まで残り</div>
+        <div class="lbl">目標まで残り</div>
         <div class="metric"><span class="mono">{{ remainingPP.toLocaleString() }}</span><span class="unit">PP</span></div>
       </div>
       <div>
-        <div class="eyebrow">今年の搭乗</div>
+        <div class="lbl">今年の搭乗</div>
         <div class="metric"><span class="mono">{{ flightsCount }}</span><span class="unit">便</span></div>
       </div>
       <div>
-        <div class="eyebrow">達成率</div>
+        <div class="lbl">達成率</div>
         <div class="metric"><span class="mono">{{ pct.toFixed(1) }}</span><span class="unit">%</span></div>
       </div>
     </div>
@@ -73,15 +73,17 @@ const pct = computed(() => Math.min(100, props.progress * 100));
     font-size: 28px;
   }
 }
+.lbl {
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+}
 .bar .ticks {
   display: flex;
   justify-content: space-between;
   margin-top: 10px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  font-size: 11px;
   color: var(--ink-mute);
-  text-transform: uppercase;
 }
 .metrics {
   display: flex;

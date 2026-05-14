@@ -5,28 +5,28 @@ defineProps<{ year: number }>();
 <template>
   <aside class="status">
     <div class="card">
-      <div class="eyebrow accent">Status target</div>
+      <div class="lbl-accent">目標ステータス</div>
       <div class="title display italic">
-        Platinum<br /><span class="sub">by Dec 31, {{ year }}</span>
+        プラチナ<br /><span class="sub">{{ year }}年12月31日まで</span>
       </div>
       <hr class="divider sky" />
       <table>
         <tbody>
           <tr>
-            <td class="lbl">Bronze</td>
+            <td class="lbl">ブロンズ</td>
             <td class="val">30,000 PP</td>
           </tr>
           <tr class="primary">
-            <td class="lbl">Platinum</td>
+            <td class="lbl">プラチナ</td>
             <td class="val">50,000 PP</td>
           </tr>
           <tr class="muted">
-            <td class="lbl">Diamond</td>
+            <td class="lbl">ダイヤモンド</td>
             <td class="val">100,000 PP</td>
           </tr>
         </tbody>
       </table>
-      <div class="badge">BOARDING</div>
+      <div class="badge">搭乗中</div>
     </div>
   </aside>
 </template>
@@ -42,8 +42,11 @@ defineProps<{ year: number }>();
   position: relative;
   overflow: hidden;
 }
-.eyebrow.accent {
+.lbl-accent {
+  font-size: 11px;
   color: var(--ana-blue);
+  letter-spacing: 0.04em;
+  font-weight: 500;
 }
 .title {
   font-size: 36px;
@@ -92,9 +95,8 @@ td {
   top: 20px;
   right: -8px;
   transform: rotate(8deg);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.2em;
+  font-size: 10px;
+  letter-spacing: 0.1em;
   color: var(--paper);
   background: var(--ana-blue);
   padding: 3px 12px;

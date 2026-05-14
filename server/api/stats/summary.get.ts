@@ -1,10 +1,10 @@
-import { serverSupabaseClient } from "#supabase/server";
+import { serverSupabaseServiceRole } from "#supabase/server";
 import { requireUser } from "~~/server/utils/auth";
-import { GOAL_PP, getCurrentYear, getSuggestions } from "~~/shared/pp";
+import { GOAL_PP, getCurrentYear } from "~~/shared/pp";
 
 export default defineEventHandler(async (event) => {
-  await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const user = await requireUser(event);
+  const client = serverSupabaseServiceRole(event);
 
   const query = getQuery(event);
   const year = Number(query.year ?? getCurrentYear());
@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
   const { data, error } = await client
     .from("flights")
     .select("pp")
+    .eq("user_id", user.id)
     .gte("flown_at", start)
     .lte("flown_at", end);
 
@@ -33,6 +34,5 @@ export default defineEventHandler(async (event) => {
     remainingPP,
     progress,
     flightsCount: flights.length,
-    suggestions: getSuggestions(remainingPP),
   };
 });

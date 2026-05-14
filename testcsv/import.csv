@@ -1,0 +1,11 @@
+flown_at,flight_number,from_airport,to_airport,cabin,fare_type,pp,aircraft,seat,lounge,rating_seat,rating_aircraft,rating_lounge,notes
+2026-01-01,NH1213,FUK,OKA,economy,simple,,,,,,,,
+2026-01-07,NH1214,OKA,FUK,economy,simple,,,,,,,,
+2026-04-10,NH246,FUK,HND,economy,simple,,,,,,,,
+2026-04-13,NH263,HND,FUK,economy,simple,,,,,,,,
+2026-04-28,NH3168,FUK,ITM,economy,simple,,,,,,,,
+2026-04-29,NH429,ITM,FUK,economy,simple,,,,,,,,
+2026-05-12,NH1201,FUK,OKA,first,simple,,,,,,,,
+2026-05-12,NH1098,OKA,HND,first,simple,,,,,,,,
+2026-05-14,NH477,HND,OKA,first,simple,,,,,,,,
+2026-05-14,NH1216,OKA,FUK,first,simple,,,,,,,,

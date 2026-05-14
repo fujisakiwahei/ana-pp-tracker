@@ -1,5 +1,3 @@
-import type { Suggestion } from "~~/shared/pp";
-
 export interface SummaryResponse {
   year: number;
   totalPP: number;
@@ -7,7 +5,6 @@ export interface SummaryResponse {
   remainingPP: number;
   progress: number;
   flightsCount: number;
-  suggestions: Suggestion[];
 }
 
 export function usePPStats(year?: MaybeRefOrGetter<number | undefined>) {

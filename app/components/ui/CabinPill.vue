@@ -6,6 +6,6 @@ defineProps<{ cabin: CabinClass }>();
 
 <template>
   <span :class="['pill', cabin === 'first' ? 'gold' : 'economy']">
-    {{ cabin === "first" ? "First" : "Economy" }}
+    {{ cabin === "first" ? "プレミアム" : "エコノミー" }}
   </span>
 </template>

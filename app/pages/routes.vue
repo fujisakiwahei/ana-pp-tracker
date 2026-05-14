@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { ROUTES, type AirportCode, type CabinClass, type Route } from "~~/shared/routes";
+import { ROUTES, type AirportCode, type CabinClass, type FareType, type Route } from "~~/shared/routes";
 import { AIRPORTS } from "~~/shared/airports";
 
 const hub = ref<AirportCode>("HND");
 const cabin = ref<CabinClass>("economy");
+const fareType = ref<FareType>("simple");
 
 const HUBS: AirportCode[] = ["HND", "FUK", "OKA"];
+
+const FARE_OPTIONS: Array<{ value: FareType; label: string }> = [
+  { value: "simple", label: "シンプル" },
+  { value: "standard", label: "スタンダード" },
+  { value: "flex", label: "フレックス" },
+];
 
 interface NormalizedRoute extends Route {
   displayFrom: AirportCode;
@@ -28,18 +35,24 @@ const routes = computed<NormalizedRoute[]>(() => {
 <template>
   <div class="subheader">
     <div>
-      <div class="eyebrow">Domestic route directory</div>
+      <div class="subhead-jp">国内線 路線一覧</div>
       <h1 class="section-title page-title">主要路線</h1>
     </div>
     <div class="cabin-switch">
-      <span class="eyebrow">Cabin</span>
-      <Segmented
-        v-model="cabin"
-        :options="[
-          { value: 'economy', label: 'Economy' },
-          { value: 'first', label: 'First' },
-        ]"
-      />
+      <div class="switch-group">
+        <span class="cabin-label">クラス</span>
+        <Segmented
+          v-model="cabin"
+          :options="[
+            { value: 'economy', label: 'エコノミー' },
+            { value: 'first', label: 'プレミアム' },
+          ]"
+        />
+      </div>
+      <div class="switch-group">
+        <span class="cabin-label">運賃</span>
+        <Segmented v-model="fareType" :options="FARE_OPTIONS" />
+      </div>
     </div>
   </div>
 
@@ -50,7 +63,7 @@ const routes = computed<NormalizedRoute[]>(() => {
       :class="['tab', { active: hub === h }]"
       @click="hub = h"
     >
-      {{ AIRPORTS[h].name }}
+      {{ AIRPORTS[h].name }}発
       <span class="sub">{{ h }} · {{ AIRPORTS[h].city }}</span>
     </button>
   </div>
@@ -62,12 +75,13 @@ const routes = computed<NormalizedRoute[]>(() => {
         :key="`${r.from}-${r.to}`"
         :route="r"
         :cabin="cabin"
+        :fare-type="fareType"
         :from="r.displayFrom"
         :to="r.displayTo"
       />
     </div>
-    <p class="note mono">
-      ※ 標準的なシンプル運賃を前提に試算した代表値です。実際の積算PPは購入運賃によって変動します。
+    <p class="note">
+      ※ 現在の日付に対応する運賃体系（〜2026/5/18 は旧、2026/5/19〜 は新）で試算しています。実際の積算PPは予約クラス・搭乗ポイント設定により変動します。
     </p>
   </div>
 </template>
@@ -79,10 +93,26 @@ const routes = computed<NormalizedRoute[]>(() => {
     font-size: 40px;
   }
 }
+.subhead-jp {
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
 .cabin-switch {
   display: flex;
   gap: 18px;
   align-items: center;
+  flex-wrap: wrap;
+}
+.switch-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.cabin-label {
+  font-size: 12px;
+  color: var(--ink-mute);
 }
 .hub-tabs {
   padding: 0 28px;

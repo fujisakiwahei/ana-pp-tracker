@@ -45,7 +45,13 @@ async function onSelect(f: File) {
     const input = result.data;
     let pp = input.pp;
     if (pp == null) {
-      pp = calcPP(input.from_airport, input.to_airport, input.cabin) ?? 0;
+      pp = calcPP(
+        input.from_airport,
+        input.to_airport,
+        input.cabin,
+        input.fare_type,
+        input.flown_at,
+      ) ?? 0;
     }
     if (pp === 0) {
       errs += 1;
@@ -110,8 +116,8 @@ async function doImport() {
 <template>
   <div class="subheader">
     <div>
-      <div class="eyebrow">Bulk import · CSV</div>
-      <h1 class="section-title page-title">CSVインポート</h1>
+      <div class="subhead-jp">一括登録</div>
+      <h1 class="section-title page-title">CSVから取り込む</h1>
     </div>
     <a href="/api/flights/sample-csv" class="btn-link" download>
       ↓ サンプルCSVをダウンロード
@@ -119,6 +125,9 @@ async function doImport() {
   </div>
 
   <div class="page-body">
+    <p class="lede">
+      CSVをアップロードすると内容をプレビューします。出発地・到着地・搭乗日・クラスは必須です。PPを空欄にすると、路線とクラスから自動計算します。
+    </p>
     <CsvDropzone :file="file" @select="onSelect" />
 
     <div v-if="previewRows.length > 0" class="result">
@@ -131,8 +140,8 @@ async function doImport() {
 
       <div class="preview">
         <header>
-          <span class="eyebrow">Preview · {{ totalRows }} rows</span>
-          <span v-if="errorCount > 0" class="alert mono">
+          <span class="preview-title">プレビュー · {{ totalRows }}件</span>
+          <span v-if="errorCount > 0" class="alert">
             {{ errorCount }}件のエラーを修正してください
           </span>
         </header>
@@ -163,6 +172,24 @@ async function doImport() {
   @media (min-width: 768px) {
     font-size: 40px;
   }
+}
+.subhead-jp {
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.lede {
+  margin: 0 0 24px;
+  font-size: 13px;
+  color: var(--ink-mute);
+  line-height: 1.7;
+  max-width: 720px;
+}
+.preview-title {
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
 }
 .result {
   margin-top: 24px;

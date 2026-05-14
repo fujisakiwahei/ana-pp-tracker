@@ -1,11 +1,11 @@
-import { serverSupabaseClient } from "#supabase/server";
+import { serverSupabaseServiceRole } from "#supabase/server";
 import { requireUser } from "~~/server/utils/auth";
 import { flightInputSchema } from "~~/shared/schema";
 import { calcPP } from "~~/shared/pp";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const client = serverSupabaseServiceRole(event);
   const body = await readBody(event);
 
   const parsed = flightInputSchema.safeParse(body);
@@ -20,12 +20,18 @@ export default defineEventHandler(async (event) => {
   const input = parsed.data;
   let pp = input.pp;
   if (pp == null) {
-    const auto = calcPP(input.from_airport, input.to_airport, input.cabin);
+    const auto = calcPP(
+      input.from_airport,
+      input.to_airport,
+      input.cabin,
+      input.fare_type,
+      input.flown_at,
+    );
     if (auto == null) {
       throw createError({
         statusCode: 400,
         statusMessage:
-          "PP の自動計算に失敗しました。該当する路線がテーブルにないため、PP を手動で入力してください。",
+          "PP の自動計算に失敗しました。該当する路線・運賃の組み合わせがテーブルにないため、PP を手動で入力してください。",
       });
     }
     pp = auto;

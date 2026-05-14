@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AirportCode, CabinClass } from "~~/shared/routes";
+import type { FlightRow } from "~~/shared/schema";
 import { getCurrentYear } from "~~/shared/pp";
 
 const currentYear = getCurrentYear();
@@ -13,11 +14,11 @@ const yearOptions = computed(() => {
   return years;
 });
 
-const { list } = useFlights();
-const { data, refresh } = await useAsyncData(
-  "flights-list",
-  () => list({ year: year.value, limit: 500 }),
-  { watch: [year] },
+const { data, refresh } = await useFetch<{ items: FlightRow[]; total: number; year: number }>(
+  "/api/flights",
+  {
+    query: computed(() => ({ year: year.value, limit: 500 })),
+  },
 );
 
 const filtered = computed(() => {
@@ -38,7 +39,7 @@ const totalPP = computed(() => filtered.value.reduce((s, f) => s + f.pp, 0));
 <template>
   <div class="subheader">
     <div>
-      <div class="eyebrow">Flight log · {{ year }}</div>
+      <div class="subhead-jp">{{ year }}年の記録</div>
       <h1 class="section-title page-title">搭乗履歴</h1>
     </div>
     <div class="controls">
@@ -57,13 +58,16 @@ const totalPP = computed(() => filtered.value.reduce((s, f) => s + f.pp, 0));
 
   <div class="page-body">
     <div class="meta">
-      <span class="eyebrow">
-        {{ filtered.length }} flights · {{ totalPP.toLocaleString() }} PP
+      <span class="meta-jp">
+        {{ filtered.length }}件 · 合計 {{ totalPP.toLocaleString() }} PP
       </span>
-      <span class="eyebrow">Sorted by date · descending</span>
+      <span class="meta-jp">搭乗日の新しい順</span>
     </div>
     <hr class="divider-thick" />
     <FlightTable :flights="filtered" />
+    <p v-if="filtered.length === 0" class="empty">
+      条件に合うフライトがありません。フィルターを変更するか、新しいフライトを登録してください。
+    </p>
   </div>
 </template>
 
@@ -80,6 +84,12 @@ const totalPP = computed(() => filtered.value.reduce((s, f) => s + f.pp, 0));
   align-items: end;
   flex-wrap: wrap;
 }
+.subhead-jp {
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
 .meta {
   display: flex;
   align-items: baseline;
@@ -87,5 +97,16 @@ const totalPP = computed(() => filtered.value.reduce((s, f) => s + f.pp, 0));
   margin-bottom: 12px;
   flex-wrap: wrap;
   gap: 8px;
+}
+.meta-jp {
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+}
+.empty {
+  margin-top: 24px;
+  font-size: 12.5px;
+  color: var(--ink-mute);
+  line-height: 1.7;
 }
 </style>

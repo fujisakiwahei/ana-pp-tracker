@@ -17,14 +17,14 @@ defineProps<{ rows: PreviewRow[] }>();
   <table class="tbl">
     <thead>
       <tr>
-        <th style="width: 30px">#</th>
-        <th>Date</th>
-        <th>Flight</th>
-        <th>From</th>
-        <th>To</th>
-        <th>Cabin</th>
+        <th style="width: 30px">行</th>
+        <th>搭乗日</th>
+        <th>便名</th>
+        <th>出発</th>
+        <th>到着</th>
+        <th>クラス</th>
         <th>PP</th>
-        <th>Status</th>
+        <th>状態</th>
       </tr>
     </thead>
     <tbody>
@@ -35,10 +35,10 @@ defineProps<{ rows: PreviewRow[] }>();
         <td class="mono">{{ r.from_airport }}</td>
         <td class="mono">{{ r.to_airport }}</td>
         <td class="mono">{{ r.cabin }}</td>
-        <td class="mono muted">{{ r.pp || "(auto)" }}</td>
+        <td class="mono muted">{{ r.pp || "(自動)" }}</td>
         <td>
-          <span v-if="r.ok" class="badge ok">● OK</span>
-          <span v-else class="badge alert">● {{ r.issue ?? "Error" }}</span>
+          <span v-if="r.ok" class="badge ok">● 登録できる</span>
+          <span v-else class="badge alert">● {{ r.issue ?? "エラー" }}</span>
         </td>
       </tr>
     </tbody>
@@ -50,15 +50,13 @@ defineProps<{ rows: PreviewRow[] }>();
   color: var(--ink-mute);
 }
 .badge {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  font-size: 11px;
+  letter-spacing: 0.04em;
 }
 .badge.ok {
   color: var(--ok);
 }
 .badge.alert {
   color: var(--alert);
-  letter-spacing: 0.05em;
 }
 </style>

@@ -20,8 +20,8 @@ onMounted(() => {
 
 <template>
   <div class="confirm">
-    <div class="eyebrow">Authenticating</div>
     <p class="msg">サインインを処理しています…</p>
+    <p class="sub">しばらく経っても画面が切り替わらない場合はサインインし直してください。</p>
   </div>
 </template>
 
@@ -40,5 +40,9 @@ onMounted(() => {
   font-style: italic;
   font-size: 22px;
   color: var(--ink-soft);
+}
+.sub {
+  font-size: 12px;
+  color: var(--ink-mute);
 }
 </style>

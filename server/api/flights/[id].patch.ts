@@ -1,11 +1,11 @@
-import { serverSupabaseClient } from "#supabase/server";
+import { serverSupabaseServiceRole } from "#supabase/server";
 import { requireUser } from "~~/server/utils/auth";
 import { flightInputSchema } from "~~/shared/schema";
 import { calcPP } from "~~/shared/pp";
 
 export default defineEventHandler(async (event) => {
-  await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const user = await requireUser(event);
+  const client = serverSupabaseServiceRole(event);
   const id = getRouterParam(event, "id");
   if (!id) throw createError({ statusCode: 400, statusMessage: "Missing id" });
 
@@ -22,7 +22,13 @@ export default defineEventHandler(async (event) => {
   const input = parsed.data;
   let pp = input.pp;
   if (pp == null) {
-    const auto = calcPP(input.from_airport, input.to_airport, input.cabin);
+    const auto = calcPP(
+      input.from_airport,
+      input.to_airport,
+      input.cabin,
+      input.fare_type,
+      input.flown_at,
+    );
     if (auto == null) {
       throw createError({
         statusCode: 400,
@@ -53,6 +59,7 @@ export default defineEventHandler(async (event) => {
     .from("flights")
     .update(updateRow)
     .eq("id", id)
+    .eq("user_id", user.id)
     .select()
     .single();
 

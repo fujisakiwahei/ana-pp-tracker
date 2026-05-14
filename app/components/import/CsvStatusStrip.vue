@@ -10,19 +10,19 @@ defineProps<{
 <template>
   <div class="strip">
     <div class="cell">
-      <div class="eyebrow">Total rows</div>
+      <div class="lbl">読み込んだ行数</div>
       <div class="val mono">{{ total }}</div>
     </div>
     <div class="cell">
-      <div class="eyebrow">Valid</div>
+      <div class="lbl">登録できる</div>
       <div class="val mono ok">{{ valid }}</div>
     </div>
     <div class="cell">
-      <div class="eyebrow">Errors</div>
+      <div class="lbl">エラー</div>
       <div class="val mono alert">{{ errors }}</div>
     </div>
     <div class="cell last">
-      <div class="eyebrow">Will add to PP</div>
+      <div class="lbl">追加されるPP</div>
       <div class="val mono">+{{ willAdd.toLocaleString() }}</div>
     </div>
   </div>
@@ -38,6 +38,11 @@ defineProps<{
   flex: 1;
   padding: 18px 22px;
   border-right: 1px solid var(--line);
+}
+.lbl {
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
 }
 .cell.last {
   border-right: none;

@@ -65,10 +65,10 @@ function onCancel() {
 <template>
   <div class="subheader">
     <div>
-      <div class="eyebrow">Edit flight · {{ flight?.flight_number ?? id.slice(0, 8) }}</div>
+      <div class="subhead-jp">編集 · {{ flight?.flight_number ?? id.slice(0, 8) }}</div>
       <h1 class="section-title page-title">フライトを編集</h1>
     </div>
-    <NuxtLink to="/flights" class="btn-link">← FLIGHT LOG</NuxtLink>
+    <NuxtLink to="/flights" class="btn-link">← 搭乗履歴に戻る</NuxtLink>
   </div>
   <div class="page-body">
     <p v-if="error" class="error mono">{{ error }}</p>
@@ -91,6 +91,12 @@ function onCancel() {
   @media (min-width: 768px) {
     font-size: 40px;
   }
+}
+.subhead-jp {
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
 }
 .error {
   color: var(--alert);

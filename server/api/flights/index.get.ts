@@ -1,11 +1,11 @@
-import { serverSupabaseClient } from "#supabase/server";
+import { serverSupabaseServiceRole } from "#supabase/server";
 import { requireUser } from "~~/server/utils/auth";
 import { getCurrentYear } from "~~/shared/pp";
 import type { FlightRow } from "~~/shared/schema";
 
 export default defineEventHandler(async (event) => {
-  await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const user = await requireUser(event);
+  const client = serverSupabaseServiceRole(event);
 
   const query = getQuery(event);
   const year = Number(query.year ?? getCurrentYear());
@@ -18,6 +18,7 @@ export default defineEventHandler(async (event) => {
   const { data, error, count } = await client
     .from("flights")
     .select("*", { count: "exact" })
+    .eq("user_id", user.id)
     .gte("flown_at", start)
     .lte("flown_at", end)
     .order("flown_at", { ascending: false })

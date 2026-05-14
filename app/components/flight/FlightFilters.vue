@@ -17,38 +17,38 @@ const emit = defineEmits<{
 <template>
   <div class="filters">
     <div class="field">
-      <label class="field-label">Year</label>
+      <label class="field-label">年</label>
       <select
         class="select"
         :value="props.year"
         @change="emit('update:year', Number(($event.target as HTMLSelectElement).value))"
       >
-        <option v-for="y in props.yearOptions" :key="y" :value="y">{{ y }}</option>
+        <option v-for="y in props.yearOptions" :key="y" :value="y">{{ y }}年</option>
       </select>
     </div>
     <div class="field">
-      <label class="field-label">Cabin</label>
+      <label class="field-label">クラス</label>
       <select
         class="select"
         :value="props.cabin"
         @change="emit('update:cabin', ($event.target as HTMLSelectElement).value as any)"
       >
-        <option value="all">All</option>
-        <option value="economy">Economy</option>
-        <option value="first">First</option>
+        <option value="all">すべて</option>
+        <option value="economy">エコノミー</option>
+        <option value="first">プレミアム</option>
       </select>
     </div>
     <div class="field">
-      <label class="field-label">Hub</label>
+      <label class="field-label">経由空港</label>
       <select
         class="select"
         :value="props.hub"
         @change="emit('update:hub', ($event.target as HTMLSelectElement).value as any)"
       >
-        <option value="all">All</option>
-        <option value="HND">HND</option>
-        <option value="FUK">FUK</option>
-        <option value="OKA">OKA</option>
+        <option value="all">すべて</option>
+        <option value="HND">羽田(HND)</option>
+        <option value="FUK">福岡(FUK)</option>
+        <option value="OKA">那覇(OKA)</option>
       </select>
     </div>
   </div>
@@ -62,6 +62,6 @@ const emit = defineEmits<{
   flex-wrap: wrap;
 }
 .field {
-  width: 100px;
+  width: 130px;
 }
 </style>

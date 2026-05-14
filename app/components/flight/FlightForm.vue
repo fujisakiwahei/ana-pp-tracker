@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toTypedSchema } from "@vee-validate/zod";
 import { flightInputSchema, type FlightInput } from "~~/shared/schema";
-import type { AirportCode, CabinClass } from "~~/shared/routes";
+import type { AirportCode, CabinClass, FareType } from "~~/shared/routes";
 import { AIRPORTS, AIRPORT_CODES } from "~~/shared/airports";
 
 const props = defineProps<{
@@ -61,10 +61,12 @@ const [ratingAircraft] = defineField("rating_aircraft");
 const [ratingLounge] = defineField("rating_lounge");
 const [notes, notesAttrs] = defineField("notes");
 
-const { route, pp: autoPP } = usePPCalc(
+const { route, pp: autoPP, isNewEra } = usePPCalc(
   () => fromAirport.value as AirportCode | undefined,
   () => toAirport.value as AirportCode | undefined,
   () => cabin.value as CabinClass | undefined,
+  () => fareType.value as FareType | undefined,
+  () => flownAt.value as string | undefined,
 );
 
 const ppDisplay = computed(() => autoPP.value ?? 0);
@@ -84,17 +86,33 @@ const projectedPct = computed(() => {
 
 const FARE_OPTIONS = [
   { value: "flex", label: "フレックス" },
-  { value: "biz", label: "Biz" },
+  { value: "biz", label: "ビジネスきっぷ / Biz" },
   { value: "standard", label: "スタンダード" },
   { value: "simple", label: "シンプル" },
-  { value: "sale", label: "セール" },
+  { value: "sale", label: "セール運賃" },
   { value: "ana_card", label: "ANAカード優待割引" },
   { value: "stockholder", label: "株主優待割引" },
   { value: "shimin", label: "島民割引" },
 ];
 
-const fareRate = computed(() => (cabin.value === "first" ? "120%" : "80%"));
-const fareBonus = computed(() => (cabin.value === "first" ? 400 : 200));
+// 表示用: 選択中の運賃 × クラス × 搭乗日 から積算率と搭乗ポイントを逆算
+const fareBreakdown = computed(() => {
+  const miles = route.value?.baseMiles ?? 0;
+  const auto = autoPP.value;
+  if (!miles || auto == null) return { rate: "—", bonus: 0 };
+  // 全運賃の搭乗ポイントは 0/100/200/400 のいずれか。autoPP から逆算する。
+  const candidates = [0, 100, 200, 400];
+  for (const bonus of candidates) {
+    const accrued = auto - bonus;
+    if (accrued < 0) continue;
+    const ratePct = (accrued / (miles * 2)) * 100;
+    const rounded = Math.round(ratePct);
+    if (Math.abs(rounded - ratePct) < 0.6 && rounded >= 30 && rounded <= 150) {
+      return { rate: `${rounded}%`, bonus };
+    }
+  }
+  return { rate: "—", bonus: 0 };
+});
 
 const onSubmit = handleSubmit((v) => emit("submit", v));
 </script>
@@ -104,7 +122,7 @@ const onSubmit = handleSubmit((v) => emit("submit", v));
     <div class="cols">
       <div class="main">
         <fieldset>
-          <legend class="eyebrow">Itinerary</legend>
+          <legend class="legend-jp">搭乗日と便</legend>
           <div class="grid-3">
             <div class="field">
               <label class="field-label">搭乗日</label>
@@ -138,7 +156,7 @@ const onSubmit = handleSubmit((v) => emit("submit", v));
         </fieldset>
 
         <fieldset>
-          <legend class="eyebrow">Route</legend>
+          <legend class="legend-jp">区間とクラス</legend>
           <div class="grid-route">
             <div class="field">
               <label class="field-label">出発</label>
@@ -165,15 +183,15 @@ const onSubmit = handleSubmit((v) => emit("submit", v));
             <Segmented
               v-model="cabin"
               :options="[
-                { value: 'economy', label: 'Economy' },
-                { value: 'first', label: 'First' },
+                { value: 'economy', label: 'エコノミー' },
+                { value: 'first', label: 'プレミアム' },
               ]"
             />
           </div>
         </fieldset>
 
         <fieldset>
-          <legend class="eyebrow">Aircraft &amp; seat</legend>
+          <legend class="legend-jp">機材と座席(任意)</legend>
           <div class="grid-3">
             <div class="field">
               <label class="field-label">機体</label>
@@ -191,7 +209,7 @@ const onSubmit = handleSubmit((v) => emit("submit", v));
         </fieldset>
 
         <fieldset>
-          <legend class="eyebrow">Review</legend>
+          <legend class="legend-jp">感想(任意)</legend>
           <div class="grid-3 ratings">
             <div class="field">
               <label class="field-label">座席</label>
@@ -250,7 +268,7 @@ const onSubmit = handleSubmit((v) => emit("submit", v));
 
       <aside class="side">
         <div class="card pp-card">
-          <div class="eyebrow">Auto-calculated</div>
+          <div class="card-sub">自動計算</div>
           <div class="card-title display italic">今回の搭乗で加算されるPP</div>
           <div class="big">
             <span class="num mono">{{ ppDisplay.toLocaleString() }}</span>
@@ -261,13 +279,14 @@ const onSubmit = handleSubmit((v) => emit("submit", v));
             <tbody>
               <tr><td class="lbl">区間</td><td class="val">{{ fromAirport }} → {{ toAirport }}</td></tr>
               <tr><td class="lbl">基本マイル</td><td class="val">{{ route?.baseMiles?.toLocaleString() ?? "—" }}</td></tr>
-              <tr><td class="lbl">積算率</td><td class="val">{{ fareRate }}</td></tr>
+              <tr><td class="lbl">積算率</td><td class="val">{{ fareBreakdown.rate }}</td></tr>
               <tr><td class="lbl">路線倍率</td><td class="val">×2</td></tr>
-              <tr><td class="lbl">搭乗ポイント</td><td class="val">+{{ fareBonus }}</td></tr>
+              <tr><td class="lbl">搭乗ポイント</td><td class="val">+{{ fareBreakdown.bonus }}</td></tr>
+              <tr><td class="lbl">運賃体系</td><td class="val">{{ isNewEra ? "新 (2026/5/19〜)" : "旧 (〜2026/5/18)" }}</td></tr>
             </tbody>
           </table>
           <p class="note">
-            シンプル運賃を前提に試算しています。実績と差がある場合は下の欄に実際のPPを入力して上書きできます。
+            搭乗日・クラス・運賃種別から積算PPを計算しています。実績と差がある場合は下の欄に実際のPPを入力して上書きできます。
           </p>
           <div class="field override">
             <label class="field-label">PP(手入力で上書き)</label>
@@ -284,12 +303,12 @@ const onSubmit = handleSubmit((v) => emit("submit", v));
 
         <div class="projected">
           <div>
-            <div class="eyebrow">記録後の累計</div>
+            <div class="projected-label">記録した後の累計</div>
             <div class="mono total">
-              {{ projectedTotal.toLocaleString() }} / {{ (summary.data.value?.goalPP ?? 50000).toLocaleString() }}
+              {{ projectedTotal.toLocaleString() }} / {{ (summary.data.value?.goalPP ?? 50000).toLocaleString() }} PP
             </div>
           </div>
-          <div class="mono delta">+{{ projectedPct.toFixed(1) }}%</div>
+          <div class="mono delta">達成率 +{{ projectedPct.toFixed(1) }}%</div>
         </div>
       </aside>
     </div>
@@ -316,8 +335,26 @@ fieldset {
   padding: 0;
   margin: 0;
 }
-legend.eyebrow {
+legend.legend-jp {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
   margin-bottom: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+  width: 100%;
+}
+.card-sub {
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+}
+.projected-label {
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
 }
 .grid-3 {
   display: grid;

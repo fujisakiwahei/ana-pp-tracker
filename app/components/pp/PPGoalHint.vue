@@ -18,8 +18,8 @@ const props = defineProps<{ suggestion: Suggestion }>();
       <span class="num mono">{{ props.suggestion.roundTripsNeeded }}</span>
       <span class="unit display italic">往復</span>
     </div>
-    <div class="caption mono">
-      {{ props.suggestion.ppRoundTrip.toLocaleString() }} PP / round-trip
+    <div class="caption">
+      往復1回 = {{ props.suggestion.ppRoundTrip.toLocaleString() }} PP
     </div>
   </div>
 </template>
@@ -58,9 +58,7 @@ header {
   color: var(--ink-mute);
 }
 .caption {
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
   color: var(--ink-mute);
-  text-transform: uppercase;
 }
 </style>

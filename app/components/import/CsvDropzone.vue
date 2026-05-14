@@ -43,20 +43,20 @@ const sizeKB = computed(() =>
     @click="pick"
   >
     <div v-if="!file" class="empty">
-      <div class="eyebrow">Drop file · or click to select</div>
+      <div class="lbl">クリックまたはドラッグ&ドロップで選択</div>
       <div class="title display italic">CSVファイルをドロップ</div>
-      <div class="hint mono">UTF-8 / ヘッダ付き / 最大1MB目安</div>
+      <div class="hint">UTF-8(BOM可) / ヘッダ行あり / 推奨1MB以下</div>
     </div>
     <div v-else class="loaded">
       <div>
-        <div class="eyebrow">Loaded</div>
+        <div class="lbl">読み込み済み</div>
         <div class="title display italic">{{ file.name }}</div>
-        <div class="hint mono">
+        <div class="hint">
           {{ sizeKB }} KB · {{ file.type || "text/csv" }}
         </div>
       </div>
       <button type="button" class="btn btn-ghost" @click.stop="pick">
-        別のファイル
+        別のファイルを選ぶ
       </button>
     </div>
     <input
@@ -86,6 +86,11 @@ const sizeKB = computed(() =>
 .dropzone.active {
   background: var(--ana-mist);
   border-color: var(--ana-blue);
+}
+.lbl {
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
 }
 .title {
   font-size: 24px;

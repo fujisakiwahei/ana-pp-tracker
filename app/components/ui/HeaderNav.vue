@@ -4,10 +4,10 @@ const user = useSupabaseUser();
 const supabase = useSupabaseClient();
 
 const NAV = [
-  { id: "dashboard", label: "DASHBOARD", to: "/" },
-  { id: "flights", label: "FLIGHTS", to: "/flights" },
-  { id: "routes", label: "ROUTES", to: "/routes" },
-  { id: "import", label: "IMPORT", to: "/import" },
+  { id: "dashboard", label: "ダッシュボード", to: "/" },
+  { id: "flights", label: "搭乗履歴", to: "/flights" },
+  { id: "routes", label: "路線一覧", to: "/routes" },
+  { id: "import", label: "CSV取込", to: "/import" },
 ];
 
 const isActive = (to: string) => {
@@ -31,7 +31,6 @@ async function signOut() {
     <NuxtLink to="/" class="brand">
       <span class="brand-bar" />
       <span class="brand-mark">PP Ledger</span>
-      <span class="brand-sub">ANA Domestic · 2026</span>
     </NuxtLink>
     <nav class="nav">
       <NuxtLink

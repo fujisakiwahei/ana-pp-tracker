@@ -1,18 +1,24 @@
 <script setup lang="ts">
-import type { CabinClass, Route, AirportCode } from "~~/shared/routes";
+import type { CabinClass, Route, AirportCode, FareType } from "~~/shared/routes";
 import { AIRPORTS } from "~~/shared/airports";
-import { buildAnaReservationUrl } from "~~/shared/pp";
+import { buildAnaReservationUrl, calcPP } from "~~/shared/pp";
 
-const props = defineProps<{
-  route: Route;
-  cabin: CabinClass;
-  from: AirportCode;
-  to: AirportCode;
-}>();
-
-const ppOneWay = computed(() =>
-  props.cabin === "first" ? props.route.ppFirst : props.route.ppEconomy,
+const props = withDefaults(
+  defineProps<{
+    route: Route;
+    cabin: CabinClass;
+    from: AirportCode;
+    to: AirportCode;
+    fareType?: FareType;
+    flownAt?: string;
+  }>(),
+  { fareType: "simple" },
 );
+
+const ppOneWay = computed(() => {
+  const dt = props.flownAt ?? new Date().toISOString().slice(0, 10);
+  return calcPP(props.from, props.to, props.cabin, props.fareType, dt) ?? 0;
+});
 const ppRoundTrip = computed(() => ppOneWay.value * 2);
 
 const reservationUrl = computed(() =>
@@ -31,15 +37,15 @@ const reservationUrl = computed(() =>
     </div>
     <div class="stats">
       <div class="stat">
-        <span class="eyebrow">Base mi</span>
+        <span class="lbl">基本マイル</span>
         <span class="val mono">{{ route.baseMiles.toLocaleString() }}</span>
       </div>
       <div class="stat accent">
-        <span class="eyebrow">One-way</span>
+        <span class="lbl">片道PP</span>
         <span class="val mono">{{ ppOneWay.toLocaleString() }}</span>
       </div>
       <div class="stat">
-        <span class="eyebrow">Round-trip</span>
+        <span class="lbl">往復PP</span>
         <span class="val mono">{{ ppRoundTrip.toLocaleString() }}</span>
       </div>
     </div>
@@ -86,6 +92,11 @@ header {
   flex-direction: column;
   gap: 4px;
   padding-right: 8px;
+}
+.stat .lbl {
+  font-size: 10.5px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
 }
 .stat .val {
   font-size: 16px;

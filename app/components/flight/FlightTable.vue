@@ -9,14 +9,14 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
   <table class="tbl">
     <thead>
       <tr>
-        <th style="width: 110px">Date</th>
-        <th style="width: 80px">Flight</th>
-        <th>Route</th>
-        <th style="width: 88px">Cabin</th>
-        <th v-if="!compact" style="width: 110px">Aircraft</th>
-        <th v-if="!compact" style="width: 70px">Seat</th>
-        <th v-if="!compact">Notes</th>
-        <th style="width: 140px">Ratings</th>
+        <th style="width: 110px">搭乗日</th>
+        <th style="width: 80px">便名</th>
+        <th>区間</th>
+        <th style="width: 88px">クラス</th>
+        <th v-if="!compact" style="width: 110px">機材</th>
+        <th v-if="!compact" style="width: 70px">座席</th>
+        <th v-if="!compact">メモ</th>
+        <th style="width: 140px">評価</th>
         <th class="num" style="width: 90px">PP</th>
       </tr>
     </thead>
@@ -41,8 +41,8 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
         <td v-if="!compact" class="notes">{{ f.notes ?? "—" }}</td>
         <td>
           <div class="ratings">
-            <span><span class="lbl">SEAT</span><RatingStars :value="f.rating_seat" /></span>
-            <span><span class="lbl">A/C</span><RatingStars :value="f.rating_aircraft" /></span>
+            <span><span class="lbl">座席</span><RatingStars :value="f.rating_seat" /></span>
+            <span><span class="lbl">機材</span><RatingStars :value="f.rating_aircraft" /></span>
           </div>
         </td>
         <td class="num pp">{{ f.pp.toLocaleString() }}</td>
@@ -59,6 +59,9 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
 <style lang="scss" scoped>
 .row {
   cursor: pointer;
+}
+.tbl tbody td.mono {
+  white-space: nowrap;
 }
 .sub {
   color: var(--ink-mute);
@@ -84,8 +87,7 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
 }
 .ratings .lbl {
   color: var(--ink-mute);
-  font-family: var(--font-mono);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   margin-right: 6px;
 }
 .pp {
@@ -95,8 +97,7 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
   padding: 24px;
   text-align: center;
   color: var(--ink-mute);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-size: 12px;
+  letter-spacing: 0.04em;
 }
 </style>
