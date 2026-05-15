@@ -336,7 +336,7 @@ fieldset {
   margin: 0;
 }
 legend.legend-jp {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--ink-soft);
   letter-spacing: 0.04em;
@@ -379,6 +379,7 @@ legend.legend-jp {
   margin-top: 22px;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
 }
 .ratings {

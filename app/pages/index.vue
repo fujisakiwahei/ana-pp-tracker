@@ -115,11 +115,13 @@ const userName = computed(() => {
 .block-section {
   position: relative;
   border-radius: 4px;
-  padding: 28px 24px 24px;
+  padding: 28px 16px 24px;
   border: 1px solid var(--line-soft);
   border-left: 3px solid var(--accent);
+  margin-inline: -12px;
   @media (min-width: 768px) {
     padding: 32px 36px 32px;
+    margin-inline: 0;
   }
 }
 .block--hero {

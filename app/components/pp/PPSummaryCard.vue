@@ -57,21 +57,31 @@ const pct = computed(() => Math.min(100, props.progress * 100));
   margin-top: 4px;
 }
 .num {
-  font-size: 64px;
+  font-size: 44px;
   font-weight: 300;
   letter-spacing: -0.02em;
   line-height: 1;
   color: var(--ink);
+  @media (min-width: 480px) {
+    font-size: 56px;
+  }
   @media (min-width: 768px) {
     font-size: 84px;
   }
 }
 .goal {
-  font-size: 22px;
+  font-size: 16px;
   color: var(--ink-mute);
+  @media (min-width: 480px) {
+    font-size: 20px;
+  }
   @media (min-width: 768px) {
     font-size: 28px;
   }
+}
+.big {
+  flex-wrap: wrap;
+  row-gap: 4px;
 }
 .lbl {
   font-size: 11px;
@@ -82,8 +92,12 @@ const pct = computed(() => Math.min(100, props.progress * 100));
   display: flex;
   justify-content: space-between;
   margin-top: 10px;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--ink-mute);
+  gap: 6px;
+  @media (min-width: 480px) {
+    font-size: 11px;
+  }
 }
 .metrics {
   display: flex;
@@ -101,9 +115,12 @@ const pct = computed(() => Math.min(100, props.progress * 100));
   margin-top: 6px;
 }
 .metric .mono {
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 400;
   letter-spacing: -0.01em;
+  @media (min-width: 768px) {
+    font-size: 26px;
+  }
 }
 .unit {
   font-size: 11px;

@@ -6,57 +6,70 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
 </script>
 
 <template>
-  <table class="tbl">
-    <thead>
-      <tr>
-        <th style="width: 110px">搭乗日</th>
-        <th style="width: 80px">便名</th>
-        <th>区間</th>
-        <th style="width: 88px">クラス</th>
-        <th v-if="!compact" style="width: 110px">機材</th>
-        <th v-if="!compact" style="width: 70px">座席</th>
-        <th v-if="!compact">メモ</th>
-        <th style="width: 140px">評価</th>
-        <th class="num" style="width: 90px">PP</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="f in flights"
-        :key="f.id"
-        class="row"
-        @click="navigateTo(`/flights/${f.id}`)"
-      >
-        <td class="mono">{{ f.flown_at }}</td>
-        <td class="mono">{{ f.flight_number ?? "—" }}</td>
-        <td>
-          <RouteCodeBadge :from="f.from_airport" :to="f.to_airport" />
-          <div class="sub">
-            {{ AIRPORTS[f.from_airport].name }} → {{ AIRPORTS[f.to_airport].name }}
-          </div>
-        </td>
-        <td><CabinPill :cabin="f.cabin" /></td>
-        <td v-if="!compact" class="mono small">{{ f.aircraft ?? "—" }}</td>
-        <td v-if="!compact" class="mono small">{{ f.seat ?? "—" }}</td>
-        <td v-if="!compact" class="notes">{{ f.notes ?? "—" }}</td>
-        <td>
-          <div class="ratings">
-            <span><span class="lbl">座席</span><RatingStars :value="f.rating_seat" /></span>
-            <span><span class="lbl">機材</span><RatingStars :value="f.rating_aircraft" /></span>
-          </div>
-        </td>
-        <td class="num pp">{{ f.pp.toLocaleString() }}</td>
-      </tr>
-      <tr v-if="flights.length === 0" class="empty-row">
-        <td :colspan="compact ? 6 : 9">
-          <div class="empty">フライトが記録されていません</div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width: 88px">クラス</th>
+          <th style="width: 110px">搭乗日</th>
+          <th style="width: 180px">区間</th>
+          <th style="width: 90px">PP</th>
+          <th style="width: 90px">便名</th>
+          <th v-if="!compact" style="width: 240px">その他</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="f in flights"
+          :key="f.id"
+          class="row"
+          @click="navigateTo(`/flights/${f.id}`)"
+        >
+          <td><CabinPill :cabin="f.cabin" /></td>
+          <td class="mono">{{ f.flown_at }}</td>
+          <td>
+            <RouteCodeBadge :from="f.from_airport" :to="f.to_airport" />
+            <div class="sub">
+              {{ AIRPORTS[f.from_airport].name }} → {{ AIRPORTS[f.to_airport].name }}
+            </div>
+          </td>
+          <td class="num pp">{{ f.pp.toLocaleString() }}</td>
+          <td class="mono">{{ f.flight_number ?? "—" }}</td>
+          <td v-if="!compact" class="misc">
+            <div class="ratings">
+              <span><span class="lbl">座席</span><RatingStars :value="f.rating_seat" /></span>
+              <span><span class="lbl">機材</span><RatingStars :value="f.rating_aircraft" /></span>
+            </div>
+            <div class="meta-line mono small">
+              {{ f.aircraft ?? "—" }} ・ {{ f.seat ?? "—" }}
+            </div>
+            <div v-if="f.notes" class="notes">{{ f.notes }}</div>
+          </td>
+        </tr>
+        <tr v-if="flights.length === 0" class="empty-row">
+          <td :colspan="compact ? 5 : 6">
+            <div class="empty">フライトが記録されていません</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <style lang="scss" scoped>
+.tbl-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-inline: -20px;
+  padding-inline: 20px;
+  @media (min-width: 768px) {
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+.tbl {
+  width: auto;
+}
 .row {
   cursor: pointer;
 }
@@ -71,10 +84,18 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
 .small {
   font-size: 12px;
 }
-.notes {
+.misc {
   font-size: 12px;
   color: var(--ink-soft);
-  max-width: 260px;
+  max-width: 320px;
+}
+.meta-line {
+  margin-top: 4px;
+  color: var(--ink-mute);
+}
+.notes {
+  margin-top: 4px;
+  color: var(--ink-soft);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

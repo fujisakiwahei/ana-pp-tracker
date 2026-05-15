@@ -125,7 +125,7 @@ const routes = computed<NormalizedRoute[]>(() => {
   color: var(--ink-mute);
 }
 .fare-banner {
-  margin: 0 28px 18px;
+  margin: 18px 8px;
   padding: 12px 16px;
   display: flex;
   align-items: center;
@@ -135,7 +135,7 @@ const routes = computed<NormalizedRoute[]>(() => {
   background: var(--surface, #fafaf7);
   border-radius: 6px;
   @media (min-width: 768px) {
-    margin: 0 48px 22px;
+    margin: 22px 48px;
     padding: 14px 20px;
   }
 }
@@ -164,7 +164,9 @@ const routes = computed<NormalizedRoute[]>(() => {
   letter-spacing: 0.02em;
 }
 .hub-tabs {
-  padding: 0 28px;
+  padding: 0 20px;
+  overflow-x: visible;
+  flex-wrap: wrap;
   @media (min-width: 768px) {
     padding: 0 48px;
   }
@@ -173,8 +175,10 @@ const routes = computed<NormalizedRoute[]>(() => {
   display: grid;
   grid-template-columns: 1fr;
   gap: 18px;
+  margin-inline: -12px;
   @media (min-width: 600px) {
     grid-template-columns: 1fr 1fr;
+    margin-inline: 0;
   }
   @media (min-width: 1024px) {
     grid-template-columns: 1fr 1fr 1fr;
