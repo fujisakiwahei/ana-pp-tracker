@@ -50,6 +50,41 @@ export const flightInputSchema = z
 
 export type FlightInput = z.infer<typeof flightInputSchema>;
 
+export const returnFlightInputSchema = z.object({
+  flown_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: "帰りの搭乗日は YYYY-MM-DD 形式で入力してください",
+  }),
+  flight_number: optionalString(10),
+  pp: emptyToUndefined(z.coerce.number().int().min(0).max(20000).optional()),
+  aircraft: optionalString(40),
+  seat: optionalString(10),
+  lounge: optionalString(40),
+  notes: optionalString(2000),
+});
+
+export type ReturnFlightInput = z.infer<typeof returnFlightInputSchema>;
+
+export const flightCreateInputSchema = z
+  .intersection(
+    flightInputSchema,
+    z.object({
+      round_trip: z.boolean().optional(),
+      return_flight: returnFlightInputSchema.optional(),
+    }),
+  )
+  .superRefine((d, ctx) => {
+    if (!d.round_trip) return;
+    if (!d.return_flight) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["return_flight"],
+        message: "復路情報を入力してください",
+      });
+    }
+  });
+
+export type FlightCreateInput = z.infer<typeof flightCreateInputSchema>;
+
 export interface FlightRow extends FlightInput {
   id: string;
   user_id: string;

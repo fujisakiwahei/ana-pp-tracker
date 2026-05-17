@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { toTypedSchema } from "@vee-validate/zod";
-import { flightInputSchema, type FlightInput } from "~~/shared/schema";
+import {
+  flightInputSchema,
+  type FlightCreateInput,
+  type FlightInput,
+  type ReturnFlightInput,
+} from "~~/shared/schema";
 import type { AirportCode, CabinClass, FareType } from "~~/shared/routes";
 import { AIRPORTS, AIRPORT_CODES } from "~~/shared/airports";
 
@@ -9,9 +14,10 @@ const props = defineProps<{
   submitLabel?: string;
   busy?: boolean;
   showDelete?: boolean;
+  enableRoundTrip?: boolean;
 }>();
 const emit = defineEmits<{
-  submit: [v: FlightInput];
+  submit: [v: FlightCreateInput];
   cancel: [];
   delete: [];
 }>();
@@ -60,6 +66,31 @@ const [ratingSeat] = defineField("rating_seat");
 const [ratingAircraft] = defineField("rating_aircraft");
 const [ratingLounge] = defineField("rating_lounge");
 const [notes, notesAttrs] = defineField("notes");
+
+const isRoundTrip = ref(false);
+const returnFlownAt = ref("");
+const returnFlightNumber = ref("");
+const returnPP = ref("");
+const returnAircraft = ref("");
+const returnSeat = ref("");
+const returnLounge = ref("");
+const returnNotes = ref("");
+const roundTripError = ref("");
+
+function clearReturnFlight() {
+  returnFlownAt.value = "";
+  returnFlightNumber.value = "";
+  returnPP.value = "";
+  returnAircraft.value = "";
+  returnSeat.value = "";
+  returnLounge.value = "";
+  returnNotes.value = "";
+  roundTripError.value = "";
+}
+
+watch(isRoundTrip, (enabled) => {
+  if (!enabled) clearReturnFlight();
+});
 
 const { route, pp: autoPP, isNewEra } = usePPCalc(
   () => fromAirport.value as AirportCode | undefined,
@@ -114,7 +145,34 @@ const fareBreakdown = computed(() => {
   return { rate: "—", bonus: 0 };
 });
 
-const onSubmit = handleSubmit((v) => emit("submit", v));
+const onSubmit = handleSubmit((v) => {
+  if (!props.enableRoundTrip || !isRoundTrip.value) {
+    emit("submit", v);
+    return;
+  }
+
+  if (!returnFlownAt.value) {
+    roundTripError.value = "帰りの搭乗日を入力してください";
+    return;
+  }
+
+  const returnFlight: ReturnFlightInput = {
+    flown_at: returnFlownAt.value,
+    flight_number: returnFlightNumber.value,
+    pp: returnPP.value === "" ? undefined : Number(returnPP.value),
+    aircraft: returnAircraft.value,
+    seat: returnSeat.value,
+    lounge: returnLounge.value,
+    notes: returnNotes.value,
+  };
+
+  roundTripError.value = "";
+  emit("submit", {
+    ...v,
+    round_trip: true,
+    return_flight: returnFlight,
+  });
+});
 </script>
 
 <template>
@@ -244,6 +302,74 @@ const onSubmit = handleSubmit((v) => emit("submit", v));
               v-model="notes"
               v-bind="notesAttrs"
             />
+          </div>
+        </fieldset>
+
+        <fieldset v-if="enableRoundTrip" class="round-trip-section">
+          <legend class="legend-jp">往復オプション</legend>
+          <label class="check-row">
+            <input
+              type="checkbox"
+              v-model="isRoundTrip"
+              :disabled="busy"
+            />
+            <span>往復にする</span>
+          </label>
+
+          <div v-if="isRoundTrip" class="return-panel">
+            <div class="route-preview mono">
+              {{ toAirport }} → {{ fromAirport }}
+            </div>
+            <div class="grid-3">
+              <div class="field">
+                <label class="field-label">帰りの搭乗日</label>
+                <input
+                  class="input mono"
+                  type="date"
+                  v-model="returnFlownAt"
+                />
+              </div>
+              <div class="field">
+                <label class="field-label">帰りの便名</label>
+                <input
+                  class="input mono"
+                  placeholder="NH255"
+                  v-model="returnFlightNumber"
+                />
+              </div>
+              <div class="field">
+                <label class="field-label">復路PP(手入力で上書き)</label>
+                <input
+                  class="input mono"
+                  type="number"
+                  placeholder="自動計算"
+                  v-model="returnPP"
+                />
+              </div>
+            </div>
+            <div class="grid-3 return-optional">
+              <div class="field">
+                <label class="field-label">帰りの機体</label>
+                <input class="input" placeholder="B787-9" v-model="returnAircraft" />
+              </div>
+              <div class="field">
+                <label class="field-label">帰りの座席</label>
+                <input class="input mono" placeholder="1A" v-model="returnSeat" />
+              </div>
+              <div class="field">
+                <label class="field-label">帰りのラウンジ</label>
+                <input class="input" placeholder="ANA LOUNGE 那覇" v-model="returnLounge" />
+              </div>
+            </div>
+            <div class="field memo">
+              <label class="field-label">帰りのメモ</label>
+              <textarea
+                class="textarea"
+                placeholder="復路の振り返り、機内サービスの感想など"
+                v-model="returnNotes"
+              />
+            </div>
+            <p v-if="roundTripError" class="field-error">{{ roundTripError }}</p>
           </div>
         </fieldset>
 
@@ -387,6 +513,37 @@ legend.legend-jp {
 }
 .memo {
   margin-top: 8px;
+}
+.round-trip-section {
+  padding-top: 4px;
+}
+.check-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.check-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+.return-panel {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.54);
+}
+.route-preview {
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+.return-optional {
+  margin-top: 18px;
 }
 .actions {
   display: flex;

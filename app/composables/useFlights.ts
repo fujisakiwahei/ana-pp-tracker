@@ -1,4 +1,4 @@
-import type { FlightInput, FlightRow } from "~~/shared/schema";
+import type { FlightCreateInput, FlightInput, FlightRow } from "~~/shared/schema";
 
 export function useFlights() {
   const list = (params: { year?: number; limit?: number; offset?: number } = {}) =>
@@ -9,8 +9,8 @@ export function useFlights() {
 
   const get = (id: string) => $fetch<FlightRow>(`/api/flights/${id}`);
 
-  const create = (payload: FlightInput) =>
-    $fetch<FlightRow>("/api/flights", {
+  const create = (payload: FlightCreateInput) =>
+    $fetch<FlightRow | FlightRow[]>("/api/flights", {
       method: "POST",
       body: payload,
     });
