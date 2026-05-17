@@ -293,7 +293,13 @@
 }
 .input::placeholder,
 .textarea::placeholder {
-  color: color-mix(in oklab, var(--ink-mute) 45%, transparent);
+  color: color-mix(in oklab, var(--ink-mute) 22%, transparent);
+}
+.required-mark {
+  display: inline-block;
+  margin-left: 4px;
+  color: #e02424;
+  font-weight: 600;
 }
 .input.mono {
   font-family: var(--font-mono);

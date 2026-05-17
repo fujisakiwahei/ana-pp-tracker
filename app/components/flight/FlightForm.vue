@@ -183,12 +183,13 @@ const onSubmit = handleSubmit((v) => {
           <legend class="legend-jp">搭乗日と便</legend>
           <div class="grid-3">
             <div class="field">
-              <label class="field-label">搭乗日</label>
+              <label class="field-label">搭乗日<span class="required-mark" aria-hidden="true">*</span></label>
               <input
                 class="input mono"
                 type="date"
                 v-model="flownAt"
                 v-bind="flownAtAttrs"
+                required
               />
               <p v-if="errors.flown_at" class="field-error">{{ errors.flown_at }}</p>
             </div>
@@ -217,8 +218,8 @@ const onSubmit = handleSubmit((v) => {
           <legend class="legend-jp">区間とクラス</legend>
           <div class="grid-route">
             <div class="field">
-              <label class="field-label">出発</label>
-              <select class="select" v-model="fromAirport" v-bind="fromAirportAttrs">
+              <label class="field-label">出発<span class="required-mark" aria-hidden="true">*</span></label>
+              <select class="select" v-model="fromAirport" v-bind="fromAirportAttrs" required>
                 <option v-for="c in AIRPORT_CODES" :key="c" :value="c">
                   {{ c }} · {{ AIRPORTS[c].name }}
                 </option>
@@ -227,8 +228,8 @@ const onSubmit = handleSubmit((v) => {
             </div>
             <span class="arrow">→</span>
             <div class="field">
-              <label class="field-label">到着</label>
-              <select class="select" v-model="toAirport" v-bind="toAirportAttrs">
+              <label class="field-label">到着<span class="required-mark" aria-hidden="true">*</span></label>
+              <select class="select" v-model="toAirport" v-bind="toAirportAttrs" required>
                 <option v-for="c in AIRPORT_CODES" :key="c" :value="c">
                   {{ c }} · {{ AIRPORTS[c].name }}
                 </option>
@@ -237,7 +238,7 @@ const onSubmit = handleSubmit((v) => {
             </div>
           </div>
           <div class="cabin-row">
-            <label class="field-label">クラス</label>
+            <label class="field-label">クラス<span class="required-mark" aria-hidden="true">*</span></label>
             <Segmented
               v-model="cabin"
               :options="[
@@ -322,11 +323,12 @@ const onSubmit = handleSubmit((v) => {
             </div>
             <div class="grid-3">
               <div class="field">
-                <label class="field-label">帰りの搭乗日</label>
+                <label class="field-label">帰りの搭乗日<span class="required-mark" aria-hidden="true">*</span></label>
                 <input
                   class="input mono"
                   type="date"
                   v-model="returnFlownAt"
+                  required
                 />
               </div>
               <div class="field">

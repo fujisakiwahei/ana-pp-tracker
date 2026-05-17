@@ -70,7 +70,7 @@ async function submit() {
         </p>
         <form class="form" @submit.prevent="submit">
           <div class="field">
-            <label class="field-label">メールアドレス</label>
+            <label class="field-label">メールアドレス<span class="required-mark" aria-hidden="true">*</span></label>
             <input
               class="input"
               type="email"
@@ -81,7 +81,7 @@ async function submit() {
             />
           </div>
           <div class="field">
-            <label class="field-label">パスワード</label>
+            <label class="field-label">パスワード<span class="required-mark" aria-hidden="true">*</span></label>
             <input
               class="input"
               type="password"
