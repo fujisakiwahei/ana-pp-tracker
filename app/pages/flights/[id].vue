@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FlightInput, FlightRow } from "~~/shared/schema";
+import type { FlightCreateInput, FlightInput, FlightRow } from "~~/shared/schema";
 
 const route = useRoute();
 const id = String(route.params.id);
@@ -31,7 +31,7 @@ const initial = computed<Partial<FlightInput> | undefined>(() => {
   };
 });
 
-async function onSubmit(values: FlightInput) {
+async function onSubmit(values: FlightCreateInput) {
   busy.value = true;
   error.value = "";
   try {

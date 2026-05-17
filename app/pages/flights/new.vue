@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { FlightInput } from "~~/shared/schema";
+import type { FlightCreateInput } from "~~/shared/schema";
 
 const { create } = useFlights();
 const busy = ref(false);
 const error = ref("");
 
-async function onSubmit(values: FlightInput) {
+async function onSubmit(values: FlightCreateInput) {
   busy.value = true;
   error.value = "";
   try {
@@ -36,7 +36,7 @@ function onCancel() {
       搭乗した路線とクラスから、積算PPが自動で計算されます。手元の運賃と異なる場合のみ「PP」欄に直接入力してください。
     </p>
     <p v-if="error" class="error mono">{{ error }}</p>
-    <FlightForm :busy="busy" @submit="onSubmit" @cancel="onCancel" />
+    <FlightForm :busy="busy" enable-round-trip @submit="onSubmit" @cancel="onCancel" />
   </div>
 </template>
 
