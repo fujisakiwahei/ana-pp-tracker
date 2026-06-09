@@ -192,13 +192,13 @@ const onSubmit = handleSubmit((v) => {
               v-model="status"
               :options="[
                 { value: 'confirmed', label: '搭乗確定' },
-                { value: 'tentative', label: '仮予約' },
+                { value: 'tentative', label: '未予約' },
               ]"
             />
             <p class="status-hint" :class="{ tentative: status === 'tentative' }">
               {{
                 status === "tentative"
-                  ? "仮予約：見込みPPとして別枠で集計（目標達成には未カウント）"
+                  ? "未予約：見込みPPとして別枠で集計（目標達成には未カウント）"
                   : "搭乗確定：確定PPとして目標達成にカウント"
               }}
             </p>

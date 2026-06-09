@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
   const confirmedPP = confirmed.reduce((s, r) => s + (r.pp ?? 0), 0);
   const tentativePP = tentative.reduce((s, r) => s + (r.pp ?? 0), 0);
 
-  // 目標達成は確定PPのみで判定。仮予約は見込みとして別枠。
+  // 目標達成は確定PPのみで判定。未予約は見込みとして別枠。
   const remainingPP = Math.max(0, GOAL_PP - confirmedPP);
   const progress = Math.min(1, confirmedPP / GOAL_PP);
   const tentativeProgress = Math.min(1, (confirmedPP + tentativePP) / GOAL_PP);

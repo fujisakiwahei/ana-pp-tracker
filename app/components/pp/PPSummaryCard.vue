@@ -10,7 +10,7 @@ const props = defineProps<{
   tentativeCount: number;
 }>();
 
-// 確定ぶんは実線塗り、仮予約ぶんはその右に薄色で継ぎ足し。
+// 確定ぶんは実線塗り、未予約ぶんはその右に薄色で継ぎ足し。
 const confirmedPct = computed(() => Math.min(100, props.progress * 100));
 const tentativePct = computed(() =>
   Math.max(0, Math.min(100, props.tentativeProgress * 100) - confirmedPct.value)
@@ -26,7 +26,7 @@ const projectedPP = computed(() => props.confirmedPP + props.tentativePP);
       <span class="goal display italic">/ {{ goalPP.toLocaleString() }}</span>
     </div>
     <div v-if="tentativePP > 0" class="projection mono">
-      ＋仮予約 {{ tentativePP.toLocaleString() }} PP
+      ＋未予約 {{ tentativePP.toLocaleString() }} PP
       <span class="arrow">→</span>
       見込み {{ projectedPP.toLocaleString() }} PP
     </div>
@@ -46,7 +46,7 @@ const projectedPP = computed(() => props.confirmedPP + props.tentativePP);
       </div>
       <div class="legend">
         <span class="key"><i class="sw sw-confirmed" />確定</span>
-        <span class="key"><i class="sw sw-tentative" />仮予約（見込み）</span>
+        <span class="key"><i class="sw sw-tentative" />未予約（見込み）</span>
       </div>
     </div>
     <div class="metrics">
@@ -58,7 +58,7 @@ const projectedPP = computed(() => props.confirmedPP + props.tentativePP);
         </div>
       </div>
       <div>
-        <div class="lbl">確定 / 仮予約</div>
+        <div class="lbl">確定 / 未予約</div>
         <div class="metric">
           <span class="mono">{{ confirmedCount }}</span
           ><span class="unit">便</span><span class="sep">/</span

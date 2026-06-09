@@ -50,7 +50,7 @@ const emit = defineEmits<{
       >
         <option value="all">すべて</option>
         <option value="confirmed">確定・搭乗済み</option>
-        <option value="tentative">仮予約</option>
+        <option value="tentative">未予約</option>
       </select>
     </div>
     <div class="field">

@@ -70,7 +70,7 @@ const tentativePP = computed(() =>
     <div class="meta">
       <span class="meta-jp">
         {{ filtered.length }}件 · 確定 {{ confirmedPP.toLocaleString() }} PP
-        <template v-if="tentativePP > 0">＋ 仮予約 {{ tentativePP.toLocaleString() }} PP</template>
+        <template v-if="tentativePP > 0">＋ 未予約 {{ tentativePP.toLocaleString() }} PP</template>
       </span>
       <span class="meta-jp">搭乗日の新しい順</span>
     </div>
