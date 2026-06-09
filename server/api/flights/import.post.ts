@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
         input.to_airport,
         input.cabin,
         input.fare_type,
-        input.flown_at,
+        input.flown_at
       );
       if (auto == null) {
         errors.push({
@@ -84,6 +84,8 @@ export default defineEventHandler(async (event) => {
       cabin: input.cabin,
       fare_type: input.fare_type ?? null,
       pp,
+      // CSV 取り込みは過去実績の一括投入が前提。明示で tentative 指定が無ければ確定扱い。
+      status: rawRow.status === "tentative" ? "tentative" : "confirmed",
       aircraft: input.aircraft ?? null,
       seat: input.seat ?? null,
       lounge: input.lounge ?? null,

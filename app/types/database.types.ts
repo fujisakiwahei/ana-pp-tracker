@@ -1,10 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type FlightRecord = {
   id: string;
@@ -16,6 +10,7 @@ export type FlightRecord = {
   cabin: "economy" | "first";
   fare_type: string | null;
   pp: number;
+  status: "confirmed" | "tentative";
   aircraft: string | null;
   seat: string | null;
   lounge: string | null;
@@ -36,6 +31,7 @@ export type FlightInsert = {
   cabin: "economy" | "first";
   fare_type?: string | null;
   pp: number;
+  status?: "confirmed" | "tentative";
   aircraft?: string | null;
   seat?: string | null;
   lounge?: string | null;

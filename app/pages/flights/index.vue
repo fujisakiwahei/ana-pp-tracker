@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { AirportCode, CabinClass } from "~~/shared/routes";
-import type { FlightRow } from "~~/shared/schema";
+import type { FlightRow, FlightStatus } from "~~/shared/schema";
 import { getCurrentYear } from "~~/shared/pp";
 
 const currentYear = getCurrentYear();
 const year = ref(currentYear);
 const cabin = ref<CabinClass | "all">("all");
 const hub = ref<AirportCode | "all">("all");
+const status = ref<FlightStatus | "all">("all");
 
 const yearOptions = computed(() => {
   const years: number[] = [];
@@ -18,22 +19,29 @@ const { data, refresh } = await useFetch<{ items: FlightRow[]; total: number; ye
   "/api/flights",
   {
     query: computed(() => ({ year: year.value, limit: 500 })),
-  },
+  }
 );
 
 const filtered = computed(() => {
   const items = data.value?.items ?? [];
   return items.filter((f) => {
     if (cabin.value !== "all" && f.cabin !== cabin.value) return false;
+    if (status.value !== "all" && (f.status ?? "confirmed") !== status.value) return false;
     if (hub.value !== "all") {
-      if (f.from_airport !== hub.value && f.to_airport !== hub.value)
-        return false;
+      if (f.from_airport !== hub.value && f.to_airport !== hub.value) return false;
     }
     return true;
   });
 });
 
-const totalPP = computed(() => filtered.value.reduce((s, f) => s + f.pp, 0));
+const confirmedPP = computed(() =>
+  filtered.value
+    .filter((f) => (f.status ?? "confirmed") !== "tentative")
+    .reduce((s, f) => s + f.pp, 0)
+);
+const tentativePP = computed(() =>
+  filtered.value.filter((f) => f.status === "tentative").reduce((s, f) => s + f.pp, 0)
+);
 </script>
 
 <template>
@@ -47,10 +55,12 @@ const totalPP = computed(() => filtered.value.reduce((s, f) => s + f.pp, 0));
         :year="year"
         :cabin="cabin"
         :hub="hub"
+        :status="status"
         :year-options="yearOptions"
         @update:year="year = $event"
         @update:cabin="cabin = $event"
         @update:hub="hub = $event"
+        @update:status="status = $event"
       />
       <NuxtLink to="/flights/new" class="btn">+ 新規登録</NuxtLink>
     </div>
@@ -59,7 +69,8 @@ const totalPP = computed(() => filtered.value.reduce((s, f) => s + f.pp, 0));
   <div class="page-body">
     <div class="meta">
       <span class="meta-jp">
-        {{ filtered.length }}件 · 合計 {{ totalPP.toLocaleString() }} PP
+        {{ filtered.length }}件 · 確定 {{ confirmedPP.toLocaleString() }} PP
+        <template v-if="tentativePP > 0">＋ 仮予約 {{ tentativePP.toLocaleString() }} PP</template>
       </span>
       <span class="meta-jp">搭乗日の新しい順</span>
     </div>

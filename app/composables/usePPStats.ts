@@ -1,10 +1,14 @@
 export interface SummaryResponse {
   year: number;
-  totalPP: number;
+  confirmedPP: number;
+  tentativePP: number;
   goalPP: number;
   remainingPP: number;
   progress: number;
+  tentativeProgress: number;
   flightsCount: number;
+  confirmedCount: number;
+  tentativeCount: number;
 }
 
 export function usePPStats(year?: MaybeRefOrGetter<number | undefined>) {

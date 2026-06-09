@@ -1,11 +1,32 @@
 import { z } from "zod";
 
 export const airportCodeSchema = z.enum([
-  "HND", "NRT", "FUK", "OKA", "CTS", "ITM", "KIX", "NGO", "SDJ", "HIJ",
-  "KMJ", "KOJ", "NGS", "MYJ", "OKJ", "HKD", "ISG", "MMY", "KMI", "OIT",
+  "HND",
+  "NRT",
+  "FUK",
+  "OKA",
+  "CTS",
+  "ITM",
+  "KIX",
+  "NGO",
+  "SDJ",
+  "HIJ",
+  "KMJ",
+  "KOJ",
+  "NGS",
+  "MYJ",
+  "OKJ",
+  "HKD",
+  "ISG",
+  "MMY",
+  "KMI",
+  "OIT",
 ]);
 
 export const cabinClassSchema = z.enum(["economy", "first"]);
+
+export const flightStatusSchema = z.enum(["confirmed", "tentative"]);
+export type FlightStatus = z.infer<typeof flightStatusSchema>;
 
 export const fareTypeSchema = z.enum([
   "flex",
@@ -21,8 +42,7 @@ export const fareTypeSchema = z.enum([
 const emptyToUndefined = <T extends z.ZodTypeAny>(s: T) =>
   z.preprocess((v) => (v === "" || v === null ? undefined : v), s);
 
-const optionalString = (max = 40) =>
-  emptyToUndefined(z.string().trim().max(max).optional());
+const optionalString = (max = 40) => emptyToUndefined(z.string().trim().max(max).optional());
 
 export const flightInputSchema = z
   .object({
@@ -34,6 +54,7 @@ export const flightInputSchema = z
     to_airport: airportCodeSchema,
     cabin: cabinClassSchema,
     fare_type: emptyToUndefined(fareTypeSchema.optional()),
+    status: flightStatusSchema.default("tentative"),
     pp: emptyToUndefined(z.coerce.number().int().min(0).max(20000).optional()),
     aircraft: optionalString(40),
     seat: optionalString(10),
@@ -70,7 +91,7 @@ export const flightCreateInputSchema = z
     z.object({
       round_trip: z.boolean().optional(),
       return_flight: returnFlightInputSchema.optional(),
-    }),
+    })
   )
   .superRefine((d, ctx) => {
     if (!d.round_trip) return;

@@ -11,6 +11,7 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
       <thead>
         <tr>
           <th style="width: 88px">クラス</th>
+          <th style="width: 92px">状態</th>
           <th style="width: 110px">搭乗日</th>
           <th style="width: 180px">区間</th>
           <th style="width: 90px">PP</th>
@@ -19,13 +20,9 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="f in flights"
-          :key="f.id"
-          class="row"
-          @click="navigateTo(`/flights/${f.id}`)"
-        >
+        <tr v-for="f in flights" :key="f.id" class="row" @click="navigateTo(`/flights/${f.id}`)">
           <td><CabinPill :cabin="f.cabin" /></td>
+          <td><StatusPill :status="f.status" :flown-at="f.flown_at" /></td>
           <td class="mono">{{ f.flown_at }}</td>
           <td>
             <RouteCodeBadge :from="f.from_airport" :to="f.to_airport" />
@@ -40,14 +37,12 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
               <span><span class="lbl">座席</span><RatingStars :value="f.rating_seat" /></span>
               <span><span class="lbl">機材</span><RatingStars :value="f.rating_aircraft" /></span>
             </div>
-            <div class="meta-line mono small">
-              {{ f.aircraft ?? "—" }} ・ {{ f.seat ?? "—" }}
-            </div>
+            <div class="meta-line mono small">{{ f.aircraft ?? "—" }} ・ {{ f.seat ?? "—" }}</div>
             <div v-if="f.notes" class="notes">{{ f.notes }}</div>
           </td>
         </tr>
         <tr v-if="flights.length === 0" class="empty-row">
-          <td :colspan="compact ? 5 : 6">
+          <td :colspan="compact ? 6 : 7">
             <div class="empty">フライトが記録されていません</div>
           </td>
         </tr>
