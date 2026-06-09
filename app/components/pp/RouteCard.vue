@@ -52,10 +52,6 @@ const reservationUrl = computed(() => buildAnaReservationUrl(props.from, props.t
     </header>
     <div class="names">{{ AIRPORTS[from].name }} ⇄ {{ AIRPORTS[to].name }}</div>
     <div class="stats">
-      <div class="stat">
-        <span class="lbl">基本マイル</span>
-        <span class="val mono">{{ route.baseMiles.toLocaleString() }}</span>
-      </div>
       <div class="stat accent">
         <span class="lbl">片道PP</span>
         <span class="val mono">{{ ppOneWay.toLocaleString() }}</span>
@@ -72,21 +68,27 @@ const reservationUrl = computed(() => buildAnaReservationUrl(props.from, props.t
       </div>
       <div class="bands">
         <div class="band good">
-          <span class="dot" aria-hidden="true" />
-          <span class="band-lbl">お得</span>
+          <span class="band-name">
+            <span class="dot" aria-hidden="true" />
+            <span class="band-lbl">お得</span>
+          </span>
           <span class="band-val mono">〜¥{{ marketView.good.yen.toLocaleString() }}</span>
           <span class="band-perpp mono">{{ marketView.good.perPP.toFixed(1) }}円/PP</span>
         </div>
         <div class="band ok">
-          <span class="dot" aria-hidden="true" />
-          <span class="band-lbl">許容</span>
+          <span class="band-name">
+            <span class="dot" aria-hidden="true" />
+            <span class="band-lbl">許容</span>
+          </span>
           <span class="band-val mono">〜¥{{ marketView.ok.yen.toLocaleString() }}</span>
           <span class="band-perpp mono">{{ marketView.ok.perPP.toFixed(1) }}円/PP</span>
         </div>
         <div class="band high">
-          <span class="dot" aria-hidden="true" />
-          <span class="band-lbl">高い</span>
-          <span class="band-val mono">¥{{ marketView.ok.yen.toLocaleString() }}超</span>
+          <span class="band-name">
+            <span class="dot" aria-hidden="true" />
+            <span class="band-lbl">高い</span>
+          </span>
+          <span class="band-val mono">¥{{ marketView.ok.yen.toLocaleString() }}〜</span>
           <span class="band-perpp mono">—</span>
         </div>
       </div>
@@ -121,7 +123,7 @@ header {
 }
 .stats {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   padding: 14px 0;
@@ -157,7 +159,7 @@ header {
 .market-head {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  gap: 8px;
 }
 .market-lbl {
   font-size: 10.5px;
@@ -173,17 +175,34 @@ header {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  @media (min-width: 768px) {
+    flex-direction: row;
+    gap: 12px;
+  }
 }
 .band {
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 8px;
+  @media (min-width: 768px) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+.band-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .band .dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 .band .band-lbl {
   font-size: 10.5px;
@@ -197,6 +216,9 @@ header {
   font-size: 10px;
   color: var(--ink-mute);
   text-align: right;
+  @media (min-width: 768px) {
+    text-align: left;
+  }
 }
 .band.good .dot {
   background: var(--ok);
