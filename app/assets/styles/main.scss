@@ -348,6 +348,22 @@
   color: var(--paper);
   border-color: var(--ink);
 }
+.pill.status-upcoming {
+  color: var(--ana-blue);
+  border-color: var(--ana-sky);
+  background: var(--ana-mist);
+}
+.pill.status-done {
+  color: var(--ink-mute);
+  border-color: var(--line);
+  background: var(--paper-soft);
+}
+.pill.status-tentative {
+  color: var(--ink-mute);
+  border-color: var(--ink-mute);
+  border-style: dashed;
+  background: transparent;
+}
 
 /* ===== Segmented ===== */
 .seg {

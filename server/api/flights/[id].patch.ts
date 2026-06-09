@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
       input.to_airport,
       input.cabin,
       input.fare_type,
-      input.flown_at,
+      input.flown_at
     );
     if (auto == null) {
       throw createError({
@@ -46,6 +46,7 @@ export default defineEventHandler(async (event) => {
     cabin: input.cabin,
     fare_type: input.fare_type ?? null,
     pp,
+    status: input.status,
     aircraft: input.aircraft ?? null,
     seat: input.seat ?? null,
     lounge: input.lounge ?? null,

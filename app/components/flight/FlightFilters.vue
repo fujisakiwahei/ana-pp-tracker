@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import type { CabinClass, AirportCode } from "~~/shared/routes";
+import type { FlightStatus } from "~~/shared/schema";
 
 const props = defineProps<{
   year: number;
   cabin: CabinClass | "all";
   hub: AirportCode | "all";
+  status: FlightStatus | "all";
   yearOptions: number[];
 }>();
 const emit = defineEmits<{
   "update:year": [v: number];
   "update:cabin": [v: CabinClass | "all"];
   "update:hub": [v: AirportCode | "all"];
+  "update:status": [v: FlightStatus | "all"];
 }>();
 </script>
 
@@ -36,6 +39,18 @@ const emit = defineEmits<{
         <option value="all">すべて</option>
         <option value="economy">エコノミー</option>
         <option value="first">プレミアム</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label">ステータス</label>
+      <select
+        class="select"
+        :value="props.status"
+        @change="emit('update:status', ($event.target as HTMLSelectElement).value as any)"
+      >
+        <option value="all">すべて</option>
+        <option value="confirmed">確定・搭乗済み</option>
+        <option value="tentative">仮予約</option>
       </select>
     </div>
     <div class="field">

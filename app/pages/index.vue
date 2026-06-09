@@ -12,7 +12,7 @@ const { data: flightList } = await useFetch<{ items: FlightRow[]; total: number;
   "/api/flights",
   {
     query: computed(() => ({ year: year.value, limit: 5 })),
-  },
+  }
 );
 
 const recentFlights = computed(() => flightList.value?.items ?? []);
@@ -38,7 +38,16 @@ const userName = computed(() => {
   </div>
   <div class="page-body" v-if="stats">
     <section class="hero block-section block--hero">
-      <PPSummaryCard :total-p-p="stats.totalPP" :goal-p-p="stats.goalPP" :remaining-p-p="stats.remainingPP" :progress="stats.progress" :flights-count="stats.flightsCount" />
+      <PPSummaryCard
+        :confirmed-p-p="stats.confirmedPP"
+        :tentative-p-p="stats.tentativePP"
+        :goal-p-p="stats.goalPP"
+        :remaining-p-p="stats.remainingPP"
+        :progress="stats.progress"
+        :tentative-progress="stats.tentativeProgress"
+        :confirmed-count="stats.confirmedCount"
+        :tentative-count="stats.tentativeCount"
+      />
     </section>
 
     <section class="block block-section block--plan">
@@ -62,7 +71,12 @@ const userName = computed(() => {
         />
       </div>
       <div class="suggestions">
-        <PPGoalHint v-for="(s, i) in suggestions" :key="`${s.from}-${s.to}-${s.cabin}`" :suggestion="s" :class="{ bordered: i < suggestions.length - 1 }" />
+        <PPGoalHint
+          v-for="(s, i) in suggestions"
+          :key="`${s.from}-${s.to}-${s.cabin}`"
+          :suggestion="s"
+          :class="{ bordered: i < suggestions.length - 1 }"
+        />
       </div>
     </section>
 
@@ -76,7 +90,9 @@ const userName = computed(() => {
       </header>
       <hr class="divider-thick" />
       <FlightTable :flights="recentFlights" compact />
-      <p v-if="recentFlights.length === 0" class="empty">まだフライトが記録されていません。「+ フライトを記録」から最初の搭乗を登録してください。</p>
+      <p v-if="recentFlights.length === 0" class="empty">
+        まだフライトが記録されていません。「+ フライトを記録」から最初の搭乗を登録してください。
+      </p>
     </section>
   </div>
 </template>
@@ -125,7 +141,11 @@ const userName = computed(() => {
   }
 }
 .block--hero {
-  background: linear-gradient(180deg, var(--card) 0%, color-mix(in oklab, var(--card) 92%, var(--ana-mist)) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--card) 0%,
+    color-mix(in oklab, var(--card) 92%, var(--ana-mist)) 100%
+  );
   border-left-color: var(--ana-blue);
 }
 .block--plan {

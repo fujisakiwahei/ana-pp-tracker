@@ -15,7 +15,7 @@ async function resolvePP(input: FlightInput) {
     input.to_airport,
     input.cabin,
     input.fare_type,
-    input.flown_at,
+    input.flown_at
   );
   if (auto == null) {
     throw createError({
@@ -37,6 +37,7 @@ async function buildInsertRow(userId: string, input: FlightInput) {
     cabin: input.cabin,
     fare_type: input.fare_type ?? null,
     pp: await resolvePP(input),
+    status: input.status,
     aircraft: input.aircraft ?? null,
     seat: input.seat ?? null,
     lounge: input.lounge ?? null,
@@ -55,6 +56,7 @@ function buildReturnInput(outbound: FlightInput, returnFlight: ReturnFlightInput
     to_airport: outbound.from_airport,
     cabin: outbound.cabin,
     fare_type: outbound.fare_type,
+    status: outbound.status,
     pp: returnFlight.pp,
     aircraft: returnFlight.aircraft,
     seat: returnFlight.seat,
@@ -81,19 +83,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const input = parsed.data;
-  const rows = [await buildInsertRow(user.id, input)];
+  const outboundRow = await buildInsertRow(user.id, input);
 
-  if (input.round_trip && input.return_flight) {
-    const returnInput = buildReturnInput(input, input.return_flight);
-    rows.push(await buildInsertRow(user.id, returnInput));
-  }
-
-  if (rows.length === 1) {
-    const { data, error } = await client
-      .from("flights")
-      .insert(rows[0])
-      .select()
-      .single();
+  if (!input.round_trip || !input.return_flight) {
+    const { data, error } = await client.from("flights").insert(outboundRow).select().single();
 
     if (error) {
       throw createError({ statusCode: 500, statusMessage: error.message });
@@ -102,10 +95,10 @@ export default defineEventHandler(async (event) => {
     return data;
   }
 
-  const { data, error } = await client
-    .from("flights")
-    .insert(rows)
-    .select();
+  const returnInput = buildReturnInput(input, input.return_flight);
+  const rows = [outboundRow, await buildInsertRow(user.id, returnInput)];
+
+  const { data, error } = await client.from("flights").insert(rows).select();
 
   if (error) {
     throw createError({ statusCode: 500, statusMessage: error.message });
