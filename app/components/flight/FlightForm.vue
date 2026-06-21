@@ -183,6 +183,10 @@ const fareBreakdown = computed(() => {
 });
 
 const onSubmit = handleSubmit((v) => {
+  // 二重送信ガード: 検証が非同期なため :disabled="busy" だけでは
+  // 連続クリックの隙間で送信が二重に走りうる（往復だと2×2=4件）。
+  if (props.busy) return;
+
   if (!props.enableRoundTrip || !isRoundTrip.value) {
     emit("submit", v);
     return;
