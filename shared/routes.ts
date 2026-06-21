@@ -21,7 +21,8 @@ export type AirportCode =
   | "KMI"
   | "OIT"
   | "WKJ"
-  | "KUH";
+  | "KUH"
+  | "SHB";
 
 export type FareType =
   | "flex"
@@ -42,6 +43,7 @@ export interface Route {
 export const ROUTES: Route[] = [
   // 羽田(HND)発着
   { from: "HND", to: "WKJ", baseMiles: 700 },
+  { from: "HND", to: "SHB", baseMiles: 605 },
   { from: "HND", to: "KUH", baseMiles: 575 },
   { from: "HND", to: "CTS", baseMiles: 510 },
   { from: "HND", to: "SDJ", baseMiles: 177 },

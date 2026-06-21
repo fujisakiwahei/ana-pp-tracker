@@ -14,6 +14,7 @@ export const AIRPORTS: Record<AirportCode, Airport> = {
   CTS: { code: "CTS", name: "新千歳", city: "札幌" },
   WKJ: { code: "WKJ", name: "稚内", city: "稚内" },
   KUH: { code: "KUH", name: "釧路", city: "釧路" },
+  SHB: { code: "SHB", name: "中標津", city: "中標津" },
   ITM: { code: "ITM", name: "伊丹", city: "大阪" },
   KIX: { code: "KIX", name: "関西", city: "大阪" },
   NGO: { code: "NGO", name: "中部", city: "名古屋" },
