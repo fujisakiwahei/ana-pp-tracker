@@ -21,6 +21,9 @@ export const airportCodeSchema = z.enum([
   "MMY",
   "KMI",
   "OIT",
+  "WKJ",
+  "KUH",
+  "SHB",
 ]);
 
 export const cabinClassSchema = z.enum(["economy", "first"]);
