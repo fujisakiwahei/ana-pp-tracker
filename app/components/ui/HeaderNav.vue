@@ -29,16 +29,11 @@ async function signOut() {
 <template>
   <header class="app-header">
     <NuxtLink to="/" class="brand">
-      <span class="brand-bar" />
+      <span class="brand-bar" aria-hidden="true">✈️</span>
       <span class="brand-mark">PP Ledger</span>
     </NuxtLink>
     <nav class="nav">
-      <NuxtLink
-        v-for="n in NAV"
-        :key="n.id"
-        :to="n.to"
-        :class="{ active: isActive(n.to) }"
-      >
+      <NuxtLink v-for="n in NAV" :key="n.id" :to="n.to" :class="{ active: isActive(n.to) }">
         {{ n.label }}
       </NuxtLink>
     </nav>
@@ -54,6 +49,10 @@ async function signOut() {
 <style lang="scss" scoped>
 .brand {
   cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+.brand:hover {
+  opacity: 0.6;
 }
 .nav a {
   cursor: pointer;

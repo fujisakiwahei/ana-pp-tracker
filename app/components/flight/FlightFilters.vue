@@ -20,8 +20,9 @@ const emit = defineEmits<{
 <template>
   <div class="filters">
     <div class="field">
-      <label class="field-label">年</label>
+      <label class="field-label" for="filter-year">年</label>
       <select
+        id="filter-year"
         class="select"
         :value="props.year"
         @change="emit('update:year', Number(($event.target as HTMLSelectElement).value))"
@@ -30,8 +31,9 @@ const emit = defineEmits<{
       </select>
     </div>
     <div class="field">
-      <label class="field-label">クラス</label>
+      <label class="field-label" for="filter-cabin">クラス</label>
       <select
+        id="filter-cabin"
         class="select"
         :value="props.cabin"
         @change="emit('update:cabin', ($event.target as HTMLSelectElement).value as any)"
@@ -42,8 +44,9 @@ const emit = defineEmits<{
       </select>
     </div>
     <div class="field">
-      <label class="field-label">ステータス</label>
+      <label class="field-label" for="filter-status">ステータス</label>
       <select
+        id="filter-status"
         class="select"
         :value="props.status"
         @change="emit('update:status', ($event.target as HTMLSelectElement).value as any)"
@@ -54,8 +57,9 @@ const emit = defineEmits<{
       </select>
     </div>
     <div class="field">
-      <label class="field-label">経由空港</label>
+      <label class="field-label" for="filter-hub">経由空港</label>
       <select
+        id="filter-hub"
         class="select"
         :value="props.hub"
         @change="emit('update:hub', ($event.target as HTMLSelectElement).value as any)"

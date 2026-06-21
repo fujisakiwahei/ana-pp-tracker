@@ -54,7 +54,7 @@ function buildReturnInput(outbound: FlightInput, returnFlight: ReturnFlightInput
     flight_number: returnFlight.flight_number,
     from_airport: outbound.to_airport,
     to_airport: outbound.from_airport,
-    cabin: outbound.cabin,
+    cabin: returnFlight.cabin ?? outbound.cabin,
     fare_type: outbound.fare_type,
     status: outbound.status,
     pp: returnFlight.pp,

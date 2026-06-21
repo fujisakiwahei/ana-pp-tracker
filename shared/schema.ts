@@ -76,6 +76,7 @@ export const returnFlightInputSchema = z.object({
     message: "帰りの搭乗日は YYYY-MM-DD 形式で入力してください",
   }),
   flight_number: optionalString(10),
+  cabin: cabinClassSchema.optional(),
   pp: emptyToUndefined(z.coerce.number().int().min(0).max(20000).optional()),
   aircraft: optionalString(40),
   seat: optionalString(10),

@@ -72,6 +72,7 @@ const [notes, notesAttrs] = defineField("notes");
 const isRoundTrip = ref(false);
 const returnFlownAt = ref("");
 const returnFlightNumber = ref("");
+const returnCabin = ref<CabinClass>("first");
 const returnPP = ref("");
 const returnAircraft = ref("");
 const returnSeat = ref("");
@@ -91,7 +92,12 @@ function clearReturnFlight() {
 }
 
 watch(isRoundTrip, (enabled) => {
-  if (!enabled) clearReturnFlight();
+  if (enabled) {
+    // 復路クラスの初期値は往路に合わせる（以降は独立して変更可能）
+    returnCabin.value = cabin.value as CabinClass;
+  } else {
+    clearReturnFlight();
+  }
 });
 
 const {
@@ -106,19 +112,44 @@ const {
   () => flownAt.value as string | undefined
 );
 
-const ppDisplay = computed(() => autoPP.value ?? 0);
+// 復路（区間を逆にして計算。クラスは復路用に独立、復路日が未入力なら往路日で代用）
+const { pp: returnAutoPP } = usePPCalc(
+  () => toAirport.value as AirportCode | undefined,
+  () => fromAirport.value as AirportCode | undefined,
+  () => returnCabin.value,
+  () => fareType.value as FareType | undefined,
+  () => (returnFlownAt.value || flownAt.value) as string | undefined
+);
+
+const isRoundTripActive = computed(() => !!props.enableRoundTrip && isRoundTrip.value);
+const outboundPP = computed(() => autoPP.value ?? 0);
+const returnPPDisplay = computed(() => {
+  if (returnPP.value !== "") {
+    const n = Number(returnPP.value);
+    if (Number.isFinite(n)) return n;
+  }
+  return returnAutoPP.value ?? 0;
+});
+const ppDisplay = computed(() =>
+  isRoundTripActive.value ? outboundPP.value + returnPPDisplay.value : outboundPP.value
+);
 const summary = useFetch<{ confirmedPP: number; goalPP: number }>("/api/stats/summary", {
   lazy: true,
   default: () => ({ confirmedPP: 0, goalPP: 50000 }),
 });
 
+// 記録時に加算される実効PP（往路は手入力上書きを優先、往復なら復路も加算）
+const addedPP = computed(() => {
+  const out = pp.value ?? autoPP.value ?? 0;
+  return isRoundTripActive.value ? out + returnPPDisplay.value : out;
+});
 const projectedTotal = computed(() => {
   const t = summary.data.value?.confirmedPP ?? 0;
-  return t + (pp.value ?? autoPP.value ?? 0);
+  return t + addedPP.value;
 });
 const projectedPct = computed(() => {
   const goal = summary.data.value?.goalPP ?? 50000;
-  return ((pp.value ?? autoPP.value ?? 0) / goal) * 100;
+  return (addedPP.value / goal) * 100;
 });
 
 const FARE_OPTIONS = [
@@ -165,6 +196,7 @@ const onSubmit = handleSubmit((v) => {
   const returnFlight: ReturnFlightInput = {
     flown_at: returnFlownAt.value,
     flight_number: returnFlightNumber.value,
+    cabin: returnCabin.value,
     pp: returnPP.value === "" ? undefined : Number(returnPP.value),
     aircraft: returnAircraft.value,
     seat: returnSeat.value,
@@ -209,21 +241,25 @@ const onSubmit = handleSubmit((v) => {
           <legend class="legend-jp">搭乗日と便</legend>
           <div class="grid-3">
             <div class="field">
-              <label class="field-label"
+              <label class="field-label" for="flown-at"
                 >搭乗日<span class="required-mark" aria-hidden="true">*</span></label
               >
               <input
+                id="flown-at"
                 class="input mono"
                 type="date"
                 v-model="flownAt"
                 v-bind="flownAtAttrs"
+                aria-describedby="flown-at-hint"
                 required
               />
+              <p id="flown-at-hint" class="field-hint">数字を打つと年→月→日へ自動で進みます</p>
               <p v-if="errors.flown_at" class="field-error">{{ errors.flown_at }}</p>
             </div>
             <div class="field">
-              <label class="field-label">便名</label>
+              <label class="field-label" for="flight-number">便名</label>
               <input
+                id="flight-number"
                 class="input mono"
                 placeholder="NH256"
                 v-model="flightNumber"
@@ -231,8 +267,8 @@ const onSubmit = handleSubmit((v) => {
               />
             </div>
             <div class="field">
-              <label class="field-label">運賃種別</label>
-              <select class="select" v-model="fareType" v-bind="fareTypeAttrs">
+              <label class="field-label" for="fare-type">運賃種別</label>
+              <select id="fare-type" class="select" v-model="fareType" v-bind="fareTypeAttrs">
                 <option value="">—</option>
                 <option v-for="o in FARE_OPTIONS" :key="o.value" :value="o.value">
                   {{ o.label }}
@@ -246,10 +282,16 @@ const onSubmit = handleSubmit((v) => {
           <legend class="legend-jp">区間とクラス</legend>
           <div class="grid-route">
             <div class="field">
-              <label class="field-label"
+              <label class="field-label" for="from-airport"
                 >出発<span class="required-mark" aria-hidden="true">*</span></label
               >
-              <select class="select" v-model="fromAirport" v-bind="fromAirportAttrs" required>
+              <select
+                id="from-airport"
+                class="select"
+                v-model="fromAirport"
+                v-bind="fromAirportAttrs"
+                required
+              >
                 <option v-for="c in AIRPORT_CODES" :key="c" :value="c">
                   {{ c }} · {{ AIRPORTS[c].name }}
                 </option>
@@ -258,10 +300,16 @@ const onSubmit = handleSubmit((v) => {
             </div>
             <span class="arrow">→</span>
             <div class="field">
-              <label class="field-label"
+              <label class="field-label" for="to-airport"
                 >到着<span class="required-mark" aria-hidden="true">*</span></label
               >
-              <select class="select" v-model="toAirport" v-bind="toAirportAttrs" required>
+              <select
+                id="to-airport"
+                class="select"
+                v-model="toAirport"
+                v-bind="toAirportAttrs"
+                required
+              >
                 <option v-for="c in AIRPORT_CODES" :key="c" :value="c">
                   {{ c }} · {{ AIRPORTS[c].name }}
                 </option>
@@ -287,16 +335,29 @@ const onSubmit = handleSubmit((v) => {
           <legend class="legend-jp">機材と座席(任意)</legend>
           <div class="grid-3">
             <div class="field">
-              <label class="field-label">機体</label>
-              <input class="input" placeholder="B787-9" v-model="aircraft" v-bind="aircraftAttrs" />
-            </div>
-            <div class="field">
-              <label class="field-label">座席</label>
-              <input class="input mono" placeholder="1A" v-model="seat" v-bind="seatAttrs" />
-            </div>
-            <div class="field">
-              <label class="field-label">ラウンジ</label>
+              <label class="field-label" for="aircraft">機体</label>
               <input
+                id="aircraft"
+                class="input"
+                placeholder="B787-9"
+                v-model="aircraft"
+                v-bind="aircraftAttrs"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="seat">座席</label>
+              <input
+                id="seat"
+                class="input mono"
+                placeholder="1A"
+                v-model="seat"
+                v-bind="seatAttrs"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="lounge">ラウンジ</label>
+              <input
+                id="lounge"
                 class="input"
                 placeholder="ANA LOUNGE 羽田"
                 v-model="lounge"
@@ -335,8 +396,9 @@ const onSubmit = handleSubmit((v) => {
             </div>
           </div>
           <div class="field memo">
-            <label class="field-label">メモ</label>
+            <label class="field-label" for="notes">メモ</label>
             <textarea
+              id="notes"
               class="textarea"
               placeholder="搭乗の振り返り、機内サービスの感想など"
               v-model="notes"
@@ -354,39 +416,77 @@ const onSubmit = handleSubmit((v) => {
 
           <div v-if="isRoundTrip" class="return-panel">
             <div class="route-preview mono">{{ toAirport }} → {{ fromAirport }}</div>
+            <div class="cabin-row">
+              <label class="field-label">帰りのクラス</label>
+              <Segmented
+                v-model="returnCabin"
+                :options="[
+                  { value: 'economy', label: 'エコノミー' },
+                  { value: 'first', label: 'プレミアム' },
+                ]"
+              />
+            </div>
             <div class="grid-3">
               <div class="field">
-                <label class="field-label"
+                <label class="field-label" for="return-flown-at"
                   >帰りの搭乗日<span class="required-mark" aria-hidden="true">*</span></label
                 >
-                <input class="input mono" type="date" v-model="returnFlownAt" required />
+                <input
+                  id="return-flown-at"
+                  class="input mono"
+                  type="date"
+                  v-model="returnFlownAt"
+                  required
+                />
               </div>
               <div class="field">
-                <label class="field-label">帰りの便名</label>
-                <input class="input mono" placeholder="NH255" v-model="returnFlightNumber" />
+                <label class="field-label" for="return-flight-number">帰りの便名</label>
+                <input
+                  id="return-flight-number"
+                  class="input mono"
+                  placeholder="NH255"
+                  v-model="returnFlightNumber"
+                />
               </div>
               <div class="field">
-                <label class="field-label">復路PP(手入力で上書き)</label>
-                <input class="input mono" type="number" placeholder="自動計算" v-model="returnPP" />
+                <label class="field-label" for="return-pp">復路PP(手入力で上書き)</label>
+                <input
+                  id="return-pp"
+                  class="input mono"
+                  type="number"
+                  :placeholder="String(returnAutoPP ?? 0)"
+                  v-model="returnPP"
+                />
               </div>
             </div>
             <div class="grid-3 return-optional">
               <div class="field">
-                <label class="field-label">帰りの機体</label>
-                <input class="input" placeholder="B787-9" v-model="returnAircraft" />
+                <label class="field-label" for="return-aircraft">帰りの機体</label>
+                <input
+                  id="return-aircraft"
+                  class="input"
+                  placeholder="B787-9"
+                  v-model="returnAircraft"
+                />
               </div>
               <div class="field">
-                <label class="field-label">帰りの座席</label>
-                <input class="input mono" placeholder="1A" v-model="returnSeat" />
+                <label class="field-label" for="return-seat">帰りの座席</label>
+                <input id="return-seat" class="input mono" placeholder="1A" v-model="returnSeat" />
               </div>
               <div class="field">
-                <label class="field-label">帰りのラウンジ</label>
-                <input class="input" placeholder="ANA LOUNGE 那覇" v-model="returnLounge" />
+                <label class="field-label" for="return-lounge">帰りのラウンジ</label>
+                <input
+                  id="return-lounge"
+                  class="input"
+                  placeholder="ANA LOUNGE 那覇"
+                  v-model="returnLounge"
+                />
               </div>
             </div>
             <div class="field memo">
-              <label class="field-label">帰りのメモ</label>
+              <label class="field-label" for="return-notes">帰りのメモ</label>
               <textarea
+                id="return-notes"
                 class="textarea"
                 placeholder="復路の振り返り、機内サービスの感想など"
                 v-model="returnNotes"
@@ -421,6 +521,9 @@ const onSubmit = handleSubmit((v) => {
             <span class="num mono">{{ ppDisplay.toLocaleString() }}</span>
             <span class="unit display italic">PP</span>
           </div>
+          <div v-if="isRoundTripActive" class="pp-split mono">
+            往路 {{ outboundPP.toLocaleString() }} + 復路 {{ returnPPDisplay.toLocaleString() }}
+          </div>
           <hr class="divider" />
           <table>
             <tbody>
@@ -454,11 +557,12 @@ const onSubmit = handleSubmit((v) => {
             搭乗日・クラス・運賃種別から積算PPを計算しています。実績と差がある場合は下の欄に実際のPPを入力して上書きできます。
           </p>
           <div class="field override">
-            <label class="field-label">PP(手入力で上書き)</label>
+            <label class="field-label" for="pp-override">PP(手入力で上書き)</label>
             <input
+              id="pp-override"
               class="input mono"
               type="number"
-              :placeholder="String(ppDisplay)"
+              :placeholder="String(outboundPP)"
               v-model="pp"
               v-bind="ppAttrs"
             />
@@ -642,6 +746,19 @@ legend.legend-jp {
 .unit {
   font-size: 20px;
   color: var(--ink-mute);
+}
+.pp-split {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+}
+.field-hint {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-mute);
+  letter-spacing: 0.03em;
+  margin-top: 4px;
 }
 hr.divider {
   margin: 22px 0;

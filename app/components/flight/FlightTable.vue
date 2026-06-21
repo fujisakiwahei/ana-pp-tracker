@@ -20,7 +20,17 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
         </tr>
       </thead>
       <tbody>
-        <tr v-for="f in flights" :key="f.id" class="row" @click="navigateTo(`/flights/${f.id}`)">
+        <tr
+          v-for="f in flights"
+          :key="f.id"
+          class="row"
+          role="link"
+          tabindex="0"
+          :aria-label="`詳細を開く: ${f.flown_at} ${f.from_airport}→${f.to_airport}`"
+          @click="navigateTo(`/flights/${f.id}`)"
+          @keydown.enter="navigateTo(`/flights/${f.id}`)"
+          @keydown.space.prevent="navigateTo(`/flights/${f.id}`)"
+        >
           <td><CabinPill :cabin="f.cabin" /></td>
           <td><StatusPill :status="f.status" :flown-at="f.flown_at" /></td>
           <td class="mono">{{ f.flown_at }}</td>
@@ -67,6 +77,10 @@ defineProps<{ flights: FlightRow[]; compact?: boolean }>();
 }
 .row {
   cursor: pointer;
+}
+.row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 .tbl tbody td.mono {
   white-space: nowrap;

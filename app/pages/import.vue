@@ -37,21 +37,20 @@ async function onSelect(f: File) {
         cabin: raw.cabin ?? "",
         pp: raw.pp,
         ok: false,
-        issue: issue
-          ? `${(issue.path as string[]).join(".")}: ${issue.message}`
-          : "Invalid",
+        issue: issue ? `${(issue.path as string[]).join(".")}: ${issue.message}` : "Invalid",
       };
     }
     const input = result.data;
     let pp = input.pp;
     if (pp == null) {
-      pp = calcPP(
-        input.from_airport,
-        input.to_airport,
-        input.cabin,
-        input.fare_type,
-        input.flown_at,
-      ) ?? 0;
+      pp =
+        calcPP(
+          input.from_airport,
+          input.to_airport,
+          input.cabin,
+          input.fare_type,
+          input.flown_at
+        ) ?? 0;
     }
     if (pp === 0) {
       errs += 1;
@@ -86,9 +85,7 @@ async function onSelect(f: File) {
   willAddPP.value = willAdd;
 }
 
-const canImport = computed(
-  () => !!file.value && errorCount.value === 0 && validCount.value > 0,
-);
+const canImport = computed(() => !!file.value && errorCount.value === 0 && validCount.value > 0);
 
 async function doImport() {
   if (!file.value || !canImport.value) return;
@@ -102,9 +99,7 @@ async function doImport() {
     }
     serverError.value =
       "サーバ側で検証エラーがありました: " +
-      (res as any).errors
-        .map((e: any) => `行 ${e.row}: ${e.issues[0]?.message}`)
-        .join(" / ");
+      (res as any).errors.map((e: any) => `行 ${e.row}: ${e.issues[0]?.message}`).join(" / ");
   } catch (e: any) {
     serverError.value = e?.statusMessage ?? e?.message ?? "インポートに失敗しました";
   } finally {
@@ -119,7 +114,7 @@ async function doImport() {
       <div class="subhead-jp">一括登録</div>
       <h1 class="section-title page-title">CSVから取り込む</h1>
     </div>
-    <a href="/api/flights/sample-csv" class="btn-link" download>
+    <a href="/api/flights/sample-csv" class="btn btn-ghost" download>
       ↓ サンプルCSVをダウンロード
     </a>
   </div>

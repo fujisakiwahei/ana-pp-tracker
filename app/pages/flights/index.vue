@@ -68,9 +68,12 @@ const tentativePP = computed(() =>
 
   <div class="page-body">
     <div class="meta">
-      <span class="meta-jp">
-        {{ filtered.length }}件 · 確定 {{ confirmedPP.toLocaleString() }} PP
-        <template v-if="tentativePP > 0">＋ 未予約 {{ tentativePP.toLocaleString() }} PP</template>
+      <span class="meta-jp meta-summary">
+        <span class="num">{{ filtered.length }}</span
+        >件 · 確定 <span class="num">{{ confirmedPP.toLocaleString() }}</span> PP
+        <template v-if="tentativePP > 0">
+          ＋ 未予約 <span class="num">{{ tentativePP.toLocaleString() }}</span> PP
+        </template>
       </span>
       <span class="meta-jp">搭乗日の新しい順</span>
     </div>
@@ -113,6 +116,15 @@ const tentativePP = computed(() =>
   font-size: 12px;
   color: var(--ink-mute);
   letter-spacing: 0.04em;
+}
+.meta-summary {
+  font-size: 16px;
+  color: var(--ink);
+}
+.meta-summary .num {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--accent);
 }
 .empty {
   margin-top: 24px;
