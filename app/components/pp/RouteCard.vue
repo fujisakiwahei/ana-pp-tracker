@@ -46,6 +46,9 @@ const reservationUrl = computed(() => buildAnaReservationUrl(props.from, props.t
 
 <template>
   <article class="card route">
+    <div class="cabin-top">
+      <CabinPill :cabin="cabin" />
+    </div>
     <header>
       <RouteCodeBadge :from="from" :to="to" big />
       <span class="mult mono">×2</span>
@@ -94,7 +97,6 @@ const reservationUrl = computed(() => buildAnaReservationUrl(props.from, props.t
       </div>
     </div>
     <footer>
-      <CabinPill :cabin="cabin" />
       <a class="btn-link" :href="reservationUrl" target="_blank" rel="noopener"> ANAで予約 → </a>
     </footer>
   </article>
@@ -238,10 +240,13 @@ header {
 .band.high .band-lbl {
   color: var(--alert);
 }
+.cabin-top {
+  display: flex;
+}
 footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-top: 4px;
 }
 </style>

@@ -1,5 +1,27 @@
 export type CabinClass = "economy" | "first";
-export type AirportCode = "HND" | "NRT" | "FUK" | "OKA" | "CTS" | "ITM" | "KIX" | "NGO" | "SDJ" | "HIJ" | "KMJ" | "KOJ" | "NGS" | "MYJ" | "OKJ" | "HKD" | "ISG" | "MMY" | "KMI" | "OIT";
+export type AirportCode =
+  | "HND"
+  | "NRT"
+  | "FUK"
+  | "OKA"
+  | "CTS"
+  | "ITM"
+  | "KIX"
+  | "NGO"
+  | "SDJ"
+  | "HIJ"
+  | "KMJ"
+  | "KOJ"
+  | "NGS"
+  | "MYJ"
+  | "OKJ"
+  | "HKD"
+  | "ISG"
+  | "MMY"
+  | "KMI"
+  | "OIT"
+  | "WKJ"
+  | "KUH";
 
 export type FareType =
   | "flex"
@@ -19,6 +41,8 @@ export interface Route {
 
 export const ROUTES: Route[] = [
   // 羽田(HND)発着
+  { from: "HND", to: "WKJ", baseMiles: 700 },
+  { from: "HND", to: "KUH", baseMiles: 575 },
   { from: "HND", to: "CTS", baseMiles: 510 },
   { from: "HND", to: "SDJ", baseMiles: 177 },
   { from: "HND", to: "HKD", baseMiles: 424 },
