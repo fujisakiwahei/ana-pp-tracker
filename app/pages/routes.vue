@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { ROUTES, type AirportCode, type CabinClass, type FareType, type Route } from "~~/shared/routes";
+import {
+  FARE_TYPE_LABELS,
+  ROUTES,
+  type AirportCode,
+  type CabinClass,
+  type FareType,
+  type Route,
+} from "~~/shared/routes";
 import { AIRPORTS } from "~~/shared/airports";
 import { FARE_CHANGE_DATE } from "~~/shared/pp";
 
@@ -9,11 +16,10 @@ const fareType = ref<FareType>("simple");
 
 const HUBS: AirportCode[] = ["HND", "FUK", "OKA"];
 
-const FARE_OPTIONS: Array<{ value: FareType; label: string }> = [
-  { value: "simple", label: "シンプル" },
-  { value: "standard", label: "スタンダード" },
-  { value: "flex", label: "フレックス" },
-];
+// 路線一覧では代表的な3運賃だけ出す。表示名は shared/routes.ts と共有する。
+const FARE_OPTIONS: Array<{ value: FareType; label: string }> = (
+  ["simple", "standard", "flex"] as const
+).map((value) => ({ value, label: FARE_TYPE_LABELS[value] }));
 
 interface NormalizedRoute extends Route {
   displayFrom: AirportCode;
