@@ -102,6 +102,12 @@ export const ROUTES: Route[] = [
 ];
 
 /**
+ * 拠点空港。路線一覧のタブと搭乗履歴の絞り込みで共有する。
+ * (ROUTES はこの3空港を起点に組んである)
+ */
+export const HUB_AIRPORT_CODES: AirportCode[] = ["HND", "FUK", "OKA"];
+
+/**
  * フォームで選べる空港。**ROUTES に登場する空港だけ**を空港マスタの順で返す。
  *
  * 空港マスタに載っていても路線データが無い空港 (現状は NRT) は、選んでも

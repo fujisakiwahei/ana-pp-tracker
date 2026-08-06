@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import type { CabinClass, AirportCode } from "~~/shared/routes";
+import {
+  CABIN_OPTIONS,
+  HUB_AIRPORT_CODES,
+  type AirportCode,
+  type CabinClass,
+} from "~~/shared/routes";
+import { AIRPORTS } from "~~/shared/airports";
 import type { FlightStatus } from "~~/shared/schema";
 
 const props = defineProps<{
@@ -39,8 +45,7 @@ const emit = defineEmits<{
         @change="emit('update:cabin', ($event.target as HTMLSelectElement).value as any)"
       >
         <option value="all">すべて</option>
-        <option value="economy">エコノミー</option>
-        <option value="first">プレミアム</option>
+        <option v-for="o in CABIN_OPTIONS" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
     </div>
     <div class="field">
@@ -65,9 +70,9 @@ const emit = defineEmits<{
         @change="emit('update:hub', ($event.target as HTMLSelectElement).value as any)"
       >
         <option value="all">すべて</option>
-        <option value="HND">羽田(HND)</option>
-        <option value="FUK">福岡(FUK)</option>
-        <option value="OKA">那覇(OKA)</option>
+        <option v-for="h in HUB_AIRPORT_CODES" :key="h" :value="h">
+          {{ AIRPORTS[h].name }}({{ h }})
+        </option>
       </select>
     </div>
   </div>

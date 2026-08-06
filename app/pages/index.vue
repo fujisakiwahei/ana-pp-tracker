@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getCurrentYear, getSuggestions } from "~~/shared/pp";
-import type { CabinClass } from "~~/shared/routes";
+import { CABIN_OPTIONS, type CabinClass } from "~~/shared/routes";
 import type { FlightRow } from "~~/shared/schema";
 
 const user = useSupabaseUser();
@@ -29,13 +29,11 @@ const userName = computed(() => {
 </script>
 
 <template>
-  <div class="subheader">
-    <div>
-      <div class="subhead-jp">{{ year }}年度の搭乗台帳</div>
-      <h1 class="display italic page-title">おかえりなさい、{{ userName }}さん</h1>
-    </div>
-    <NuxtLink to="/flights/new" class="btn">+ フライトを記録</NuxtLink>
-  </div>
+  <PageHeader hero :eyebrow="`${year}年度の搭乗台帳`" :title="`おかえりなさい、${userName}さん`">
+    <template #actions>
+      <NuxtLink to="/flights/new" class="btn">+ フライトを記録</NuxtLink>
+    </template>
+  </PageHeader>
   <div v-if="stats" class="page-body">
     <section class="hero block-section block--hero">
       <PPSummaryCard
@@ -62,13 +60,7 @@ const userName = computed(() => {
       </header>
       <hr class="divider-thick" />
       <div class="seg-row">
-        <Segmented
-          v-model="suggestionCabin"
-          :options="[
-            { value: 'economy', label: 'エコノミー' },
-            { value: 'first', label: 'プレミアム' },
-          ]"
-        />
+        <Segmented v-model="suggestionCabin" :options="CABIN_OPTIONS" />
       </div>
       <div class="suggestions">
         <PPGoalHint
@@ -98,26 +90,11 @@ const userName = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-.subhead-jp {
-  font-size: 12px;
-  color: var(--ink-mute);
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
-}
 .empty {
   padding: 24px 0 8px;
   font-size: 12.5px;
   color: var(--ink-mute);
   line-height: 1.7;
-}
-.page-title {
-  font-weight: 500;
-  font-size: 32px;
-  margin: 10px 0 0;
-  letter-spacing: 0.005em;
-  @media (min-width: 768px) {
-    font-size: 46px;
-  }
 }
 .hero {
   display: grid;

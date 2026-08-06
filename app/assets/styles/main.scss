@@ -133,6 +133,27 @@
   text-transform: uppercase;
   color: var(--ink-mute);
 }
+/* ページ見出しの上に置く小見出し。日本語向けなので .eyebrow (英字・大文字) とは別物。 */
+.subhead-jp {
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+/* ページ冒頭の説明文 */
+.lede {
+  margin: 0 0 24px;
+  font-size: 13px;
+  color: var(--ink-mute);
+  line-height: 1.7;
+  max-width: 720px;
+}
+/* フォーム送信エラーなど、ページ単位のエラー表示 */
+.form-error {
+  color: var(--alert);
+  font-size: 12px;
+  margin-bottom: 18px;
+}
 .section-title {
   font-family: var(--font-display);
   font-weight: 500;
