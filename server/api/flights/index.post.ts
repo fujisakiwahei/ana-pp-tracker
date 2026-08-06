@@ -1,53 +1,22 @@
 import { serverSupabaseClient } from "#supabase/server";
 import { requireUser } from "~~/server/utils/auth";
+import { toFlightInsertRow, type FlightInsertRow } from "~~/server/utils/flightRow";
 import {
   flightCreateInputSchema,
   type FlightInput,
   type ReturnFlightInput,
 } from "~~/shared/schema";
-import { calcPP } from "~~/shared/pp";
+import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "~~/shared/pp";
 
-async function resolvePP(input: FlightInput) {
-  if (input.pp != null) return input.pp;
-
-  const auto = calcPP(
-    input.from_airport,
-    input.to_airport,
-    input.cabin,
-    input.fare_type,
-    input.flown_at
-  );
-  if (auto == null) {
-    throw createError({
-      statusCode: 400,
-      statusMessage:
-        "PP の自動計算に失敗しました。該当する路線・運賃の組み合わせがテーブルにないため、PP を手動で入力してください。",
-    });
+function buildInsertRow(userId: string, input: FlightInput): FlightInsertRow {
+  const pp = resolvePP(input);
+  if (pp == null) {
+    throw createError({ statusCode: 400, statusMessage: PP_RESOLVE_ERROR_MESSAGE });
   }
-  return auto;
+  return toFlightInsertRow(userId, input, pp);
 }
 
-async function buildInsertRow(userId: string, input: FlightInput) {
-  return {
-    user_id: userId,
-    flown_at: input.flown_at,
-    flight_number: input.flight_number ?? null,
-    from_airport: input.from_airport,
-    to_airport: input.to_airport,
-    cabin: input.cabin,
-    fare_type: input.fare_type ?? null,
-    pp: await resolvePP(input),
-    status: input.status,
-    aircraft: input.aircraft ?? null,
-    seat: input.seat ?? null,
-    lounge: input.lounge ?? null,
-    rating_seat: input.rating_seat ?? null,
-    rating_aircraft: input.rating_aircraft ?? null,
-    rating_lounge: input.rating_lounge ?? null,
-    notes: input.notes ?? null,
-  };
-}
-
+/** 復路は往路の区間を反転し、運賃種別とステータスは往路に合わせる。評価は復路側で独立。 */
 function buildReturnInput(outbound: FlightInput, returnFlight: ReturnFlightInput): FlightInput {
   return {
     flown_at: returnFlight.flown_at,
@@ -83,7 +52,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const input = parsed.data;
-  const outboundRow = await buildInsertRow(user.id, input);
+  const outboundRow = buildInsertRow(user.id, input);
 
   if (!input.round_trip || !input.return_flight) {
     const { data, error } = await client.from("flights").insert(outboundRow).select().single();
@@ -95,10 +64,9 @@ export default defineEventHandler(async (event) => {
     return data;
   }
 
-  const returnInput = buildReturnInput(input, input.return_flight);
-  const rows = [outboundRow, await buildInsertRow(user.id, returnInput)];
+  const returnRow = buildInsertRow(user.id, buildReturnInput(input, input.return_flight));
 
-  const { data, error } = await client.from("flights").insert(rows).select();
+  const { data, error } = await client.from("flights").insert([outboundRow, returnRow]).select();
 
   if (error) {
     throw createError({ statusCode: 500, statusMessage: error.message });

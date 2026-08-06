@@ -1,4 +1,5 @@
 import { ROUTES, type AirportCode, type CabinClass, type FareType, type Route } from "./routes";
+import type { FlightInput } from "./schema";
 
 export const GOAL_PP = 50000;
 
@@ -210,3 +211,25 @@ export function getCurrentYear(): number {
  *  区間ごとにURLが変わるかのように見えるシグネチャになっていた)
  */
 export const ANA_RESERVATION_URL = "https://www.ana.co.jp/ja/jp/";
+
+/**
+ * 入力から実際に記録するPPを決める。
+ * 手入力の上書きがあればそれを、無ければ路線テーブルから自動計算する。
+ * 自動計算できない組み合わせ（路線が無い / その運賃にそのクラスが無い）は null。
+ *
+ * サーバの登録・更新・CSV取り込みと、CSVプレビュー画面で共有する。
+ */
+export function resolvePP(input: FlightInput): number | null {
+  if (input.pp != null) return input.pp;
+  return calcPP(
+    input.from_airport,
+    input.to_airport,
+    input.cabin,
+    input.fare_type,
+    input.flown_at,
+  );
+}
+
+/** resolvePP が null を返したときにユーザーへ出す文言。3つのAPIで共有する。 */
+export const PP_RESOLVE_ERROR_MESSAGE =
+  "PP の自動計算に失敗しました。該当する路線・運賃の組み合わせがテーブルにないため、PP を手動で入力してください。";
