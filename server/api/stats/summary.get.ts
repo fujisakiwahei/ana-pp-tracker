@@ -1,10 +1,11 @@
 import { serverSupabaseClient } from "#supabase/server";
+import type { Database } from "~~/shared/database.types";
 import { requireUser } from "~~/server/utils/auth";
 import { GOAL_PP, getCurrentYear } from "~~/shared/pp";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const client = await serverSupabaseClient<Database>(event);
 
   const query = getQuery(event);
   const year = Number(query.year ?? getCurrentYear());
@@ -23,7 +24,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const flights = data ?? [];
-  // status が無い旧データは確定扱い（!== "tentative"）。
+  // status は NOT NULL DEFAULT 'confirmed' なので必ず入っている。
+  // 将来ステータスが増えても「未予約以外は確定扱い」で通るよう !== で判定する。
   const confirmed = flights.filter((r) => r.status !== "tentative");
   const tentative = flights.filter((r) => r.status === "tentative");
   const confirmedPP = confirmed.reduce((s, r) => s + (r.pp ?? 0), 0);

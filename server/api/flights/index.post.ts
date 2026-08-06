@@ -1,4 +1,5 @@
 import { serverSupabaseClient } from "#supabase/server";
+import type { Database } from "~~/shared/database.types";
 import { requireUser } from "~~/server/utils/auth";
 import { toFlightInsertRow, type FlightInsertRow } from "~~/server/utils/flightRow";
 import {
@@ -39,7 +40,7 @@ function buildReturnInput(outbound: FlightInput, returnFlight: ReturnFlightInput
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const client = await serverSupabaseClient<Database>(event);
   const body = await readBody(event);
 
   const parsed = flightCreateInputSchema.safeParse(body);

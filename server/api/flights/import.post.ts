@@ -1,5 +1,6 @@
 import Papa from "papaparse";
 import { serverSupabaseClient } from "#supabase/server";
+import type { Database } from "~~/shared/database.types";
 import { requireUser } from "~~/server/utils/auth";
 import { toFlightInsertRow, type FlightInsertRow } from "~~/server/utils/flightRow";
 import { csvFlightInputSchema } from "~~/shared/schema";
@@ -12,7 +13,7 @@ interface RowError {
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const client = await serverSupabaseClient<Database>(event);
 
   const parts = await readMultipartFormData(event);
   const file = parts?.find((p) => p.name === "file" || p.filename);

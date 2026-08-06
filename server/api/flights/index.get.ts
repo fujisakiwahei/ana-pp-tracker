@@ -1,11 +1,11 @@
 import { serverSupabaseClient } from "#supabase/server";
+import { asFlightRows, type Database } from "~~/shared/database.types";
 import { requireUser } from "~~/server/utils/auth";
 import { getCurrentYear } from "~~/shared/pp";
-import type { FlightRow } from "~~/shared/schema";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const client = await serverSupabaseClient<Database>(event);
 
   const query = getQuery(event);
   const year = Number(query.year ?? getCurrentYear());
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    items: (data ?? []) as FlightRow[],
+    items: asFlightRows(data ?? []),
     total: count ?? 0,
     year,
   };

@@ -1,9 +1,10 @@
 import { serverSupabaseClient } from "#supabase/server";
+import { asFlightRow, type Database } from "~~/shared/database.types";
 import { requireUser } from "~~/server/utils/auth";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const client = await serverSupabaseClient<Database>(event);
   const id = getRouterParam(event, "id");
   if (!id) throw createError({ statusCode: 400, statusMessage: "Missing id" });
 
@@ -17,5 +18,5 @@ export default defineEventHandler(async (event) => {
   if (error) {
     throw createError({ statusCode: 404, statusMessage: error.message });
   }
-  return data;
+  return asFlightRow(data);
 });

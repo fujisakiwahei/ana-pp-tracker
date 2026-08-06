@@ -1,4 +1,5 @@
 import type { FlightInput } from "~~/shared/schema";
+import type { FlightInsert } from "~~/shared/database.types";
 
 /**
  * FlightInput を flights テーブルの列に変換する。
@@ -32,8 +33,11 @@ export function toFlightColumns(input: FlightInput, pp: number) {
 
 export type FlightColumns = ReturnType<typeof toFlightColumns>;
 
-/** insert 用。所有者を明示する user_id が付く。 */
-export type FlightInsertRow = FlightColumns & { user_id: string };
+/**
+ * insert 用。所有者を明示する user_id が付く。
+ * DB の Insert 型そのものなので、列を足し忘れると型エラーになる。
+ */
+export type FlightInsertRow = FlightInsert;
 
 export function toFlightInsertRow(
   userId: string,

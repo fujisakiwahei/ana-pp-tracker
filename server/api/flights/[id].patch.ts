@@ -1,4 +1,5 @@
 import { serverSupabaseClient } from "#supabase/server";
+import type { Database } from "~~/shared/database.types";
 import { requireUser } from "~~/server/utils/auth";
 import { toFlightColumns } from "~~/server/utils/flightRow";
 import { flightInputSchema } from "~~/shared/schema";
@@ -6,7 +7,7 @@ import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "~~/shared/pp";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = await serverSupabaseClient(event);
+  const client = await serverSupabaseClient<Database>(event);
   const id = getRouterParam(event, "id");
   if (!id) throw createError({ statusCode: 400, statusMessage: "Missing id" });
 

@@ -20,7 +20,7 @@ const initial = computed<Partial<FlightInput> | undefined>(() => {
     to_airport: f.to_airport,
     cabin: f.cabin,
     fare_type: f.fare_type ?? undefined,
-    status: f.status ?? "confirmed",
+    status: f.status,
     pp: f.pp,
     aircraft: f.aircraft ?? "",
     seat: f.seat ?? "",
