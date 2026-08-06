@@ -5,6 +5,8 @@
 
 調査時点: 2026-08-06 / 対象コミット: `3fca711`
 
+**すべて実装してPRを出し済み。CIは全PRグリーン。**
+
 ---
 
 ## 優先度の考え方
@@ -17,17 +19,17 @@
 
 ## 提案一覧
 
-| # | Issue | 概要 | 主な対象 |
-| --- | --- | --- | --- |
-| 1 | [#10](https://github.com/fujisakiwahei/ana-pp-tracker/issues/10) | テスト・型チェック・Lint・CIを整備する | `package.json`, `.github/` |
-| 2 | [#5](https://github.com/fujisakiwahei/ana-pp-tracker/issues/5) | 空港・クラス・運賃種別の定義を1箇所に集約する | `shared/routes.ts`, `shared/schema.ts`, `shared/airports.ts` |
-| 3 | [#7](https://github.com/fujisakiwahei/ana-pp-tracker/issues/7) | 全APIがService RoleでRLSを迂回している状態を見直す | `server/api/**` |
-| 4 | [#6](https://github.com/fujisakiwahei/ana-pp-tracker/issues/6) | サーバAPIの行マッピングとPP解決処理を共通化する | `server/api/flights/**` |
-| 5 | [#9](https://github.com/fujisakiwahei/ana-pp-tracker/issues/9) | PP計算の内訳を `shared/pp.ts` から返し、UI側の逆算ハックを廃止する | `shared/pp.ts`, `FlightForm.vue` |
-| 6 | [#8](https://github.com/fujisakiwahei/ana-pp-tracker/issues/8) | `FlightForm.vue`(811行)を分割し、復路をvee-validate管理下に統一する | `app/components/flight/**` |
-| 7 | [#11](https://github.com/fujisakiwahei/ana-pp-tracker/issues/11) | 未使用の `database.types.ts` を整理し、Supabaseクライアントを型付けする | `app/types/database.types.ts` |
-| 8 | [#12](https://github.com/fujisakiwahei/ana-pp-tracker/issues/12) | ページ共通のヘッダーとSCSSの重複を共通化する | `app/pages/**` |
-| 9 | [#13](https://github.com/fujisakiwahei/ana-pp-tracker/issues/13) | リポジトリ直下のビルド成果物・作業用ファイルを整理する | `main.css`, `design-tone/` |
+| # | Issue | PR | 概要 | 主な対象 |
+| --- | --- | --- | --- | --- |
+| 1 | [#10](https://github.com/fujisakiwahei/ana-pp-tracker/issues/10) | [#14](https://github.com/fujisakiwahei/ana-pp-tracker/pull/14) | テスト・型チェック・Lint・CIを整備する | `package.json`, `.github/` |
+| 2 | [#5](https://github.com/fujisakiwahei/ana-pp-tracker/issues/5) | [#16](https://github.com/fujisakiwahei/ana-pp-tracker/pull/16) | 空港・クラス・運賃種別の定義を1箇所に集約する | `shared/routes.ts`, `shared/schema.ts`, `shared/airports.ts` |
+| 3 | [#7](https://github.com/fujisakiwahei/ana-pp-tracker/issues/7) | [#20](https://github.com/fujisakiwahei/ana-pp-tracker/pull/20) | 全APIがService RoleでRLSを迂回している状態を見直す | `server/api/**` |
+| 4 | [#6](https://github.com/fujisakiwahei/ana-pp-tracker/issues/6) | [#21](https://github.com/fujisakiwahei/ana-pp-tracker/pull/21) | サーバAPIの行マッピングとPP解決処理を共通化する | `server/api/flights/**` |
+| 5 | [#9](https://github.com/fujisakiwahei/ana-pp-tracker/issues/9) | [#17](https://github.com/fujisakiwahei/ana-pp-tracker/pull/17) | PP計算の内訳を `shared/pp.ts` から返し、UI側の逆算ハックを廃止する | `shared/pp.ts`, `FlightForm.vue` |
+| 6 | [#8](https://github.com/fujisakiwahei/ana-pp-tracker/issues/8) | [#18](https://github.com/fujisakiwahei/ana-pp-tracker/pull/18) | `FlightForm.vue`(811行)を分割し、復路をvee-validate管理下に統一する | `app/components/flight/**` |
+| 7 | [#11](https://github.com/fujisakiwahei/ana-pp-tracker/issues/11) | [#22](https://github.com/fujisakiwahei/ana-pp-tracker/pull/22) | 未使用の `database.types.ts` を整理し、Supabaseクライアントを型付けする | `app/types/database.types.ts` |
+| 8 | [#12](https://github.com/fujisakiwahei/ana-pp-tracker/issues/12) | [#19](https://github.com/fujisakiwahei/ana-pp-tracker/pull/19) | ページ共通のヘッダーとSCSSの重複を共通化する | `app/pages/**` |
+| 9 | [#13](https://github.com/fujisakiwahei/ana-pp-tracker/issues/13) | [#15](https://github.com/fujisakiwahei/ana-pp-tracker/pull/15) | リポジトリ直下のビルド成果物・作業用ファイルを整理する | `main.css`, `design-tone/` |
 
 ---
 
@@ -67,3 +69,35 @@
 | `app/types/database.types.ts` (62行) がどこからも import されていない。クライアントに `Database` 型が渡っていないため結果が実質 `any` | #11 |
 | `.subhead-jp` が6ページに同一定義。`scoped` のため1箇所直しても他に効かず、`.page-title` はすでに `index.vue` だけズレている | #12 |
 | `main.css` / `main.css.map` が Git 管理下だが参照ゼロ（`nuxt.config.ts` は `main.scss` を指す） | #13 |
+
+
+---
+
+## PR のスタック構成
+
+同じファイルを触るものは積み重ねてある。base ブランチを親PRに向けているので、
+親をマージすると子の差分はそのPRの内容だけになる。
+
+```
+main ─┬─ #14 テスト/CI ─┬─ #16 定義集約 ─ #17 PP内訳 ─ #18 Form分割 ─ #19 SCSS
+      │                 └─ #20 RLS ─ #21 API共通化 ─ #22 型付け
+      └─ #15 ファイル整理
+```
+
+マージ順は上の図の左から右へ。`#14` と `#15` は独立しているのでどちらからでもよい。
+
+## 実装して分かったこと（Issue 起票時点では気づいていなかった点）
+
+| PR | 内容 |
+| --- | --- |
+| [#17](https://github.com/fujisakiwahei/ana-pp-tracker/pull/17) | 逆算ハックは「壊れやすい」ではなく **すでに壊れていた**。全328通り中177通り（54%）で積算率・搭乗ポイントを誤表示していた。合計PPは正しいので記録値に影響はない |
+| [#14](https://github.com/fujisakiwahei/ana-pp-tracker/pull/14) | ESLint導入で、正規表現リテラルの中に BOM(U+FEFF) が不可視のまま埋め込まれていたのを検出 |
+| [#19](https://github.com/fujisakiwahei/ana-pp-tracker/pull/19) | ダッシュボードの見出しだけ `.display .italic`（斜体）で、他ページの `.section-title` と別物だった。前後のスクリーンショット比較で検出 |
+| [#22](https://github.com/fujisakiwahei/ana-pp-tracker/pull/22) | DB行の型を `interface` で書くと supabase-js の制約を満たせず、スキーマ全体が `never` に落ちて型付けが黙って無効になる |
+
+## 残した判断（レビューで決めてほしいもの）
+
+- **NRT**（[#16](https://github.com/fujisakiwahei/ana-pp-tracker/pull/16)）— 基本マイルを推測で埋めたくないので路線は追加せず、フォームの選択肢を `ROUTES` から導出する形にした。成田を使いたくなったら `ROUTES` に追加すれば自動で選択肢に戻る
+- **`design-tone/` の去就**（[#15](https://github.com/fujisakiwahei/ana-pp-tracker/pull/15)）— 削除ではなく `docs/` へ移動した。不要なら削除に切り替え可
+- **DBのCHECK制約**（[#22](https://github.com/fujisakiwahei/ana-pp-tracker/pull/22)）— 空港コード・運賃種別にCHECK制約を足せば型が完全に truthful になるが、既存データの検証が要るので別PR扱いにした
+- **RLSの実動作確認**（[#20](https://github.com/fujisakiwahei/ana-pp-tracker/pull/20)）— 実際のSupabaseプロジェクトが要るためこちらでは未確認。マージ前に実データでの確認をお願いしたい
