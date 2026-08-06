@@ -17,7 +17,14 @@ export type FlightStatus = z.infer<typeof flightStatusSchema>;
 const emptyToUndefined = <T extends z.ZodTypeAny>(s: T) =>
   z.preprocess((v) => (v === "" || v === null ? undefined : v), s);
 
-const optionalString = (max = 40) => emptyToUndefined(z.string().trim().max(max).optional());
+const optionalString = (max = 40) =>
+  emptyToUndefined(
+    z
+      .string()
+      .trim()
+      .max(max, { message: `${max}文字以内で入力してください` })
+      .optional()
+  );
 
 export const flightInputSchema = z
   .object({

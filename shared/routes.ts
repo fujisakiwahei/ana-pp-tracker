@@ -7,6 +7,17 @@ export type { AirportCode };
 export const CABIN_CLASSES = ["economy", "first"] as const;
 export type CabinClass = (typeof CABIN_CLASSES)[number];
 
+/** 座席クラスの表示名。Record<CabinClass, string> なのでクラス追加時にラベルが型で強制される。 */
+export const CABIN_LABELS: Record<CabinClass, string> = {
+  economy: "エコノミー",
+  first: "プレミアム",
+};
+
+/** Segmented / select にそのまま渡せるクラス選択肢。 */
+export const CABIN_OPTIONS: Array<{ value: CabinClass; label: string }> = CABIN_CLASSES.map(
+  (value) => ({ value, label: CABIN_LABELS[value] })
+);
+
 /** 運賃種別。**値リストの唯一の定義元**で、Zod の fareTypeSchema もここから導出する。 */
 export const FARE_TYPES = [
   "flex",
