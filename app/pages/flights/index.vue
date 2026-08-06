@@ -45,12 +45,9 @@ const tentativePP = computed(() =>
 </script>
 
 <template>
-  <div class="subheader">
-    <div>
-      <div class="subhead-jp">{{ year }}年の記録</div>
-      <h1 class="section-title page-title">搭乗履歴</h1>
-    </div>
-    <div class="controls">
+  <PageHeader :eyebrow="`${year}年の記録`" title="搭乗履歴">
+    <template #actions>
+      <div class="controls">
       <FlightFilters
         :year="year"
         :cabin="cabin"
@@ -62,9 +59,10 @@ const tentativePP = computed(() =>
         @update:hub="hub = $event"
         @update:status="status = $event"
       />
-      <NuxtLink to="/flights/new" class="btn">+ 新規登録</NuxtLink>
-    </div>
-  </div>
+        <NuxtLink to="/flights/new" class="btn">+ 新規登録</NuxtLink>
+      </div>
+    </template>
+  </PageHeader>
 
   <div class="page-body">
     <div class="meta">
@@ -86,23 +84,11 @@ const tentativePP = computed(() =>
 </template>
 
 <style lang="scss" scoped>
-.page-title {
-  font-size: 32px;
-  @media (min-width: 768px) {
-    font-size: 40px;
-  }
-}
 .controls {
   display: flex;
   gap: 16px;
   align-items: end;
   flex-wrap: wrap;
-}
-.subhead-jp {
-  font-size: 12px;
-  color: var(--ink-mute);
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
 }
 .meta {
   display: flex;

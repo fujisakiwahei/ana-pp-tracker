@@ -64,15 +64,13 @@ function onCancel() {
 </script>
 
 <template>
-  <div class="subheader">
-    <div>
-      <div class="subhead-jp">編集 · {{ flight?.flight_number ?? id.slice(0, 8) }}</div>
-      <h1 class="section-title page-title">フライトを編集</h1>
-    </div>
-    <NuxtLink to="/flights" class="btn-link">← 搭乗履歴に戻る</NuxtLink>
-  </div>
+  <PageHeader :eyebrow="`編集 · ${flight?.flight_number ?? id.slice(0, 8)}`" title="フライトを編集">
+    <template #actions>
+      <NuxtLink to="/flights" class="btn-link">← 搭乗履歴に戻る</NuxtLink>
+    </template>
+  </PageHeader>
   <div class="page-body">
-    <p v-if="error" class="error mono">{{ error }}</p>
+    <p v-if="error" class="form-error mono">{{ error }}</p>
     <FlightForm
       v-if="initial"
       :initial-values="initial"
@@ -87,21 +85,4 @@ function onCancel() {
 </template>
 
 <style lang="scss" scoped>
-.page-title {
-  font-size: 32px;
-  @media (min-width: 768px) {
-    font-size: 40px;
-  }
-}
-.subhead-jp {
-  font-size: 12px;
-  color: var(--ink-mute);
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
-}
-.error {
-  color: var(--alert);
-  font-size: 12px;
-  margin-bottom: 18px;
-}
 </style>

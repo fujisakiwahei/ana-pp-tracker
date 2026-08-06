@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CabinClass, Route, AirportCode, FareType } from "~~/shared/routes";
 import { AIRPORTS } from "~~/shared/airports";
-import { buildAnaReservationUrl, calcPP } from "~~/shared/pp";
+import { ANA_RESERVATION_URL, calcPP, todayISO } from "~~/shared/pp";
 import { lookupMarket, yenPerPP } from "~~/shared/marketFares";
 
 const props = withDefaults(
@@ -18,7 +18,7 @@ const props = withDefaults(
 );
 
 const ppOneWay = computed(() => {
-  const dt = props.flownAt ?? new Date().toISOString().slice(0, 10);
+  const dt = props.flownAt ?? todayISO();
   return calcPP(props.from, props.to, props.cabin, props.fareType, dt) ?? 0;
 });
 const ppRoundTrip = computed(() => ppOneWay.value * 2);
@@ -26,7 +26,7 @@ const ppRoundTrip = computed(() => ppOneWay.value * 2);
 // 相場の目安は「代表運賃 simple」固定で評価（画面の運賃セレクタとは独立）。
 const market = computed(() => lookupMarket(props.from, props.to, props.cabin));
 const marketPP = computed(() => {
-  const dt = props.flownAt ?? new Date().toISOString().slice(0, 10);
+  const dt = props.flownAt ?? todayISO();
   return calcPP(props.from, props.to, props.cabin, "simple", dt);
 });
 const marketView = computed(() => {
@@ -42,7 +42,6 @@ const marketView = computed(() => {
   };
 });
 
-const reservationUrl = computed(() => buildAnaReservationUrl(props.from, props.to));
 </script>
 
 <template>
@@ -98,7 +97,7 @@ const reservationUrl = computed(() => buildAnaReservationUrl(props.from, props.t
       </div>
     </div>
     <footer>
-      <a class="btn-link" :href="reservationUrl" target="_blank" rel="noopener"> ANAで予約 → </a>
+      <a class="btn-link" :href="ANA_RESERVATION_URL" target="_blank" rel="noopener"> ANAで予約 → </a>
     </footer>
   </article>
 </template>
