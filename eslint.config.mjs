@@ -24,6 +24,26 @@ export default withNuxt(
       "vue/no-multiple-template-root": "off",
     },
   },
+  {
+    files: ["server/**/*.ts"],
+    rules: {
+      // Service Role キーは RLS を完全にバイパスする。
+      // 通常のハンドラは serverSupabaseClient を使い、RLS を効かせる。
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "#supabase/server",
+              importNames: ["serverSupabaseServiceRole"],
+              message:
+                "serverSupabaseServiceRole は RLS をバイパスします。ユーザーのリクエストを処理するハンドラでは serverSupabaseClient を使ってください。",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // 整形は Prettier に任せ、競合するスタイル系ルールを無効化する。
   prettier
 );

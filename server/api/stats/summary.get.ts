@@ -1,10 +1,10 @@
-import { serverSupabaseServiceRole } from "#supabase/server";
+import { serverSupabaseClient } from "#supabase/server";
 import { requireUser } from "~~/server/utils/auth";
 import { GOAL_PP, getCurrentYear } from "~~/shared/pp";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = serverSupabaseServiceRole(event);
+  const client = await serverSupabaseClient(event);
 
   const query = getQuery(event);
   const year = Number(query.year ?? getCurrentYear());

@@ -1,4 +1,4 @@
-import { serverSupabaseServiceRole } from "#supabase/server";
+import { serverSupabaseClient } from "#supabase/server";
 import { requireUser } from "~~/server/utils/auth";
 import {
   flightCreateInputSchema,
@@ -70,7 +70,7 @@ function buildReturnInput(outbound: FlightInput, returnFlight: ReturnFlightInput
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = serverSupabaseServiceRole(event);
+  const client = await serverSupabaseClient(event);
   const body = await readBody(event);
 
   const parsed = flightCreateInputSchema.safeParse(body);
