@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {
+  CABIN_OPTIONS,
   FARE_TYPE_LABELS,
+  HUB_AIRPORT_CODES,
   ROUTES,
   type AirportCode,
   type CabinClass,
@@ -13,8 +15,6 @@ import { FARE_CHANGE_DATE } from "~~/shared/pp";
 const hub = ref<AirportCode>("HND");
 const cabin = ref<CabinClass>("economy");
 const fareType = ref<FareType>("simple");
-
-const HUBS: AirportCode[] = ["HND", "FUK", "OKA"];
 
 // 路線一覧では代表的な3運賃だけ出す。表示名は shared/routes.ts と共有する。
 const FARE_OPTIONS: Array<{ value: FareType; label: string }> = (
@@ -40,28 +40,20 @@ const routes = computed<NormalizedRoute[]>(() => {
 </script>
 
 <template>
-  <div class="subheader">
-    <div>
-      <div class="subhead-jp">国内線 路線一覧</div>
-      <h1 class="section-title page-title">主要路線</h1>
-    </div>
-    <div class="cabin-switch">
-      <div class="switch-group">
-        <span class="cabin-label">クラス</span>
-        <Segmented
-          v-model="cabin"
-          :options="[
-            { value: 'economy', label: 'エコノミー' },
-            { value: 'first', label: 'プレミアム' },
-          ]"
-        />
+  <PageHeader eyebrow="国内線 路線一覧" title="主要路線">
+    <template #actions>
+      <div class="cabin-switch">
+        <div class="switch-group">
+          <span class="cabin-label">クラス</span>
+          <Segmented v-model="cabin" :options="CABIN_OPTIONS" />
+        </div>
+        <div class="switch-group">
+          <span class="cabin-label">運賃</span>
+          <Segmented v-model="fareType" :options="FARE_OPTIONS" />
+        </div>
       </div>
-      <div class="switch-group">
-        <span class="cabin-label">運賃</span>
-        <Segmented v-model="fareType" :options="FARE_OPTIONS" />
-      </div>
-    </div>
-  </div>
+    </template>
+  </PageHeader>
 
   <aside class="fare-banner" role="note">
     <span class="badge">NEW</span>
@@ -73,7 +65,7 @@ const routes = computed<NormalizedRoute[]>(() => {
 
   <div class="tabs hub-tabs">
     <button
-      v-for="h in HUBS"
+      v-for="h in HUB_AIRPORT_CODES"
       :key="h"
       :class="['tab', { active: hub === h }]"
       @click="hub = h"
@@ -103,18 +95,6 @@ const routes = computed<NormalizedRoute[]>(() => {
 </template>
 
 <style lang="scss" scoped>
-.page-title {
-  font-size: 32px;
-  @media (min-width: 768px) {
-    font-size: 40px;
-  }
-}
-.subhead-jp {
-  font-size: 12px;
-  color: var(--ink-mute);
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
-}
 .cabin-switch {
   display: flex;
   gap: 18px;
