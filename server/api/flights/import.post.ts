@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "CSVファイルが見つかりません" });
   }
 
-  const text = file.data.toString("utf-8").replace(/^﻿/, "");
+  const text = file.data.toString("utf-8").replace(/^\uFEFF/, "");
   const parsed = Papa.parse<Record<string, string>>(text, {
     header: true,
     skipEmptyLines: true,
@@ -34,6 +34,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const errors: RowError[] = [];
+  // FIXME(#6): 行マッピングを server/utils/ へ切り出すときに型を付ける。
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows: any[] = [];
 
   parsed.data.forEach((rawRow, i) => {

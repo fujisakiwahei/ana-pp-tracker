@@ -250,9 +250,9 @@ const onSubmit = handleSubmit((v) => {
               >
               <input
                 id="flown-at"
+                v-model="flownAt"
                 class="input mono"
                 type="date"
-                v-model="flownAt"
                 v-bind="flownAtAttrs"
                 aria-describedby="flown-at-hint"
                 required
@@ -264,15 +264,15 @@ const onSubmit = handleSubmit((v) => {
               <label class="field-label" for="flight-number">便名</label>
               <input
                 id="flight-number"
+                v-model="flightNumber"
                 class="input mono"
                 placeholder="NH256"
-                v-model="flightNumber"
                 v-bind="flightNumberAttrs"
               />
             </div>
             <div class="field">
               <label class="field-label" for="fare-type">運賃種別</label>
-              <select id="fare-type" class="select" v-model="fareType" v-bind="fareTypeAttrs">
+              <select id="fare-type" v-model="fareType" class="select" v-bind="fareTypeAttrs">
                 <option value="">—</option>
                 <option v-for="o in FARE_OPTIONS" :key="o.value" :value="o.value">
                   {{ o.label }}
@@ -291,8 +291,8 @@ const onSubmit = handleSubmit((v) => {
               >
               <select
                 id="from-airport"
-                class="select"
                 v-model="fromAirport"
+                class="select"
                 v-bind="fromAirportAttrs"
                 required
               >
@@ -309,8 +309,8 @@ const onSubmit = handleSubmit((v) => {
               >
               <select
                 id="to-airport"
-                class="select"
                 v-model="toAirport"
+                class="select"
                 v-bind="toAirportAttrs"
                 required
               >
@@ -342,9 +342,9 @@ const onSubmit = handleSubmit((v) => {
               <label class="field-label" for="aircraft">機体</label>
               <input
                 id="aircraft"
+                v-model="aircraft"
                 class="input"
                 placeholder="B787-9"
-                v-model="aircraft"
                 v-bind="aircraftAttrs"
               />
             </div>
@@ -352,9 +352,9 @@ const onSubmit = handleSubmit((v) => {
               <label class="field-label" for="seat">座席</label>
               <input
                 id="seat"
+                v-model="seat"
                 class="input mono"
                 placeholder="1A"
-                v-model="seat"
                 v-bind="seatAttrs"
               />
             </div>
@@ -362,9 +362,9 @@ const onSubmit = handleSubmit((v) => {
               <label class="field-label" for="lounge">ラウンジ</label>
               <input
                 id="lounge"
+                v-model="lounge"
                 class="input"
                 placeholder="ANA LOUNGE 羽田"
-                v-model="lounge"
                 v-bind="loungeAttrs"
               />
             </div>
@@ -403,9 +403,9 @@ const onSubmit = handleSubmit((v) => {
             <label class="field-label" for="notes">メモ</label>
             <textarea
               id="notes"
+              v-model="notes"
               class="textarea"
               placeholder="搭乗の振り返り、機内サービスの感想など"
-              v-model="notes"
               v-bind="notesAttrs"
             />
           </div>
@@ -414,7 +414,7 @@ const onSubmit = handleSubmit((v) => {
         <fieldset v-if="enableRoundTrip" class="round-trip-section">
           <legend class="legend-jp">往復オプション</legend>
           <label class="check-row">
-            <input type="checkbox" v-model="isRoundTrip" :disabled="busy" />
+            <input v-model="isRoundTrip" type="checkbox" :disabled="busy" />
             <span>往復にする</span>
           </label>
 
@@ -437,9 +437,9 @@ const onSubmit = handleSubmit((v) => {
                 >
                 <input
                   id="return-flown-at"
+                  v-model="returnFlownAt"
                   class="input mono"
                   type="date"
-                  v-model="returnFlownAt"
                   required
                 />
               </div>
@@ -447,19 +447,19 @@ const onSubmit = handleSubmit((v) => {
                 <label class="field-label" for="return-flight-number">帰りの便名</label>
                 <input
                   id="return-flight-number"
+                  v-model="returnFlightNumber"
                   class="input mono"
                   placeholder="NH255"
-                  v-model="returnFlightNumber"
                 />
               </div>
               <div class="field">
                 <label class="field-label" for="return-pp">復路PP(手入力で上書き)</label>
                 <input
                   id="return-pp"
+                  v-model="returnPP"
                   class="input mono"
                   type="number"
                   :placeholder="String(returnAutoPP ?? 0)"
-                  v-model="returnPP"
                 />
               </div>
             </div>
@@ -468,22 +468,22 @@ const onSubmit = handleSubmit((v) => {
                 <label class="field-label" for="return-aircraft">帰りの機体</label>
                 <input
                   id="return-aircraft"
+                  v-model="returnAircraft"
                   class="input"
                   placeholder="B787-9"
-                  v-model="returnAircraft"
                 />
               </div>
               <div class="field">
                 <label class="field-label" for="return-seat">帰りの座席</label>
-                <input id="return-seat" class="input mono" placeholder="1A" v-model="returnSeat" />
+                <input id="return-seat" v-model="returnSeat" class="input mono" placeholder="1A" />
               </div>
               <div class="field">
                 <label class="field-label" for="return-lounge">帰りのラウンジ</label>
                 <input
                   id="return-lounge"
+                  v-model="returnLounge"
                   class="input"
                   placeholder="ANA LOUNGE 那覇"
-                  v-model="returnLounge"
                 />
               </div>
             </div>
@@ -491,9 +491,9 @@ const onSubmit = handleSubmit((v) => {
               <label class="field-label" for="return-notes">帰りのメモ</label>
               <textarea
                 id="return-notes"
+                v-model="returnNotes"
                 class="textarea"
                 placeholder="復路の振り返り、機内サービスの感想など"
-                v-model="returnNotes"
               />
             </div>
             <p v-if="roundTripError" class="field-error">{{ roundTripError }}</p>
@@ -564,10 +564,10 @@ const onSubmit = handleSubmit((v) => {
             <label class="field-label" for="pp-override">PP(手入力で上書き)</label>
             <input
               id="pp-override"
+              v-model="pp"
               class="input mono"
               type="number"
               :placeholder="String(outboundPP)"
-              v-model="pp"
               v-bind="ppAttrs"
             />
             <p v-if="errors.pp" class="field-error">{{ errors.pp }}</p>

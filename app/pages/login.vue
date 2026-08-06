@@ -35,8 +35,8 @@ async function submit() {
       });
       if (err) throw err;
     }
-  } catch (e: any) {
-    error.value = e?.message ?? "サインインに失敗しました";
+  } catch (e) {
+    error.value = toErrorMessage(e, "サインインに失敗しました");
   } finally {
     busy.value = false;
   }
@@ -72,22 +72,22 @@ async function submit() {
           <div class="field">
             <label class="field-label">メールアドレス<span class="required-mark" aria-hidden="true">*</span></label>
             <input
+              v-model="email"
               class="input"
               type="email"
               autocomplete="email"
               placeholder="you@example.com"
-              v-model="email"
               required
             />
           </div>
           <div class="field">
             <label class="field-label">パスワード<span class="required-mark" aria-hidden="true">*</span></label>
             <input
+              v-model="password"
               class="input"
               type="password"
               :autocomplete="mode === 'signin' ? 'current-password' : 'new-password'"
               placeholder="••••••••"
-              v-model="password"
               required
               minlength="6"
             />

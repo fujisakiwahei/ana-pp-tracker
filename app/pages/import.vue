@@ -99,9 +99,9 @@ async function doImport() {
     }
     serverError.value =
       "サーバ側で検証エラーがありました: " +
-      (res as any).errors.map((e: any) => `行 ${e.row}: ${e.issues[0]?.message}`).join(" / ");
-  } catch (e: any) {
-    serverError.value = e?.statusMessage ?? e?.message ?? "インポートに失敗しました";
+      res.errors.map((e) => `行 ${e.row}: ${e.issues[0]?.message}`).join(" / ");
+  } catch (e) {
+    serverError.value = toErrorMessage(e, "インポートに失敗しました");
   } finally {
     busy.value = false;
   }

@@ -1,4 +1,4 @@
-import { type AirportCode, type CabinClass } from "./routes";
+import type { AirportCode, CabinClass } from "./routes";
 
 /**
  * 路線×クラスの実勢相場（片道・円）。

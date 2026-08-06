@@ -6,7 +6,7 @@ import type { FlightRow } from "~~/shared/schema";
 const user = useSupabaseUser();
 const year = ref(getCurrentYear());
 const suggestionCabin = ref<CabinClass>("economy");
-const { data: stats, refresh } = await usePPStats(year);
+const { data: stats } = await usePPStats(year);
 
 const { data: flightList } = await useFetch<{ items: FlightRow[]; total: number; year: number }>(
   "/api/flights",
@@ -36,7 +36,7 @@ const userName = computed(() => {
     </div>
     <NuxtLink to="/flights/new" class="btn">+ フライトを記録</NuxtLink>
   </div>
-  <div class="page-body" v-if="stats">
+  <div v-if="stats" class="page-body">
     <section class="hero block-section block--hero">
       <PPSummaryCard
         :confirmed-p-p="stats.confirmedPP"
