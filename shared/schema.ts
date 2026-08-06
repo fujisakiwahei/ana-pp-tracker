@@ -47,7 +47,17 @@ const emptyToUndefined = <T extends z.ZodTypeAny>(s: T) =>
 
 const optionalString = (max = 40) => emptyToUndefined(z.string().trim().max(max).optional());
 
-export const flightInputSchema = z
+/** 出発地と到着地が同じレコードを弾く。フォーム用・CSV用の両スキーマで共有する。 */
+const differentAirports = {
+  check: (d: { from_airport: string; to_airport: string }) => d.from_airport !== d.to_airport,
+  params: { path: ["to_airport"], message: "出発地と到着地が同じです" },
+};
+
+/**
+ * フライト1件の共通フィールド。
+ * status の既定値だけ用途で変えたいので、ここは status 抜きで定義する。
+ */
+const flightInputFields = z
   .object({
     flown_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
       message: "搭乗日は YYYY-MM-DD 形式で入力してください",
@@ -57,7 +67,6 @@ export const flightInputSchema = z
     to_airport: airportCodeSchema,
     cabin: cabinClassSchema,
     fare_type: emptyToUndefined(fareTypeSchema.optional()),
-    status: flightStatusSchema.default("tentative"),
     pp: emptyToUndefined(z.coerce.number().int().min(0).max(20000).optional()),
     aircraft: optionalString(40),
     seat: optionalString(10),
@@ -66,13 +75,28 @@ export const flightInputSchema = z
     rating_aircraft: emptyToUndefined(z.coerce.number().int().min(1).max(5).optional()),
     rating_lounge: emptyToUndefined(z.coerce.number().int().min(1).max(5).optional()),
     notes: optionalString(2000),
-  })
-  .refine((d) => d.from_airport !== d.to_airport, {
-    path: ["to_airport"],
-    message: "出発地と到着地が同じです",
   });
 
+/**
+ * フォームからの入力。status の既定は「未予約」。
+ * これから乗る便を先に登録する使い方が主なため。
+ */
+export const flightInputSchema = flightInputFields
+  .extend({ status: flightStatusSchema.default("tentative") })
+  .refine(differentAirports.check, differentAirports.params);
+
 export type FlightInput = z.infer<typeof flightInputSchema>;
+
+/**
+ * CSV取り込みの1行。status の既定は「搭乗確定」。
+ * 過去実績の一括投入が前提のため、フォームとは既定値が逆になる。
+ * (以前は検証済みの値ではなく生のCSV行から status を読み直していた)
+ */
+export const csvFlightInputSchema = flightInputFields
+  .extend({ status: flightStatusSchema.default("confirmed") })
+  .refine(differentAirports.check, differentAirports.params);
+
+export type CsvFlightInput = z.infer<typeof csvFlightInputSchema>;
 
 export const returnFlightInputSchema = z.object({
   flown_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PreviewRow } from "~/components/import/CsvPreviewTable.vue";
-import { flightInputSchema } from "~~/shared/schema";
-import { calcPP } from "~~/shared/pp";
+import { csvFlightInputSchema } from "~~/shared/schema";
+import { resolvePP } from "~~/shared/pp";
 
 const { parseFile } = useCsv();
 const { importCsv } = useFlights();
@@ -24,7 +24,8 @@ async function onSelect(f: File) {
   let errs = 0;
   let willAdd = 0;
   const rows: PreviewRow[] = data.map((raw, i) => {
-    const result = flightInputSchema.safeParse(raw);
+    // サーバ (import.post.ts) と同じスキーマ・同じPP解決を使う。
+    const result = csvFlightInputSchema.safeParse(raw);
     if (!result.success) {
       errs += 1;
       const issue = result.error.issues[0];
@@ -41,18 +42,8 @@ async function onSelect(f: File) {
       };
     }
     const input = result.data;
-    let pp = input.pp;
+    const pp = resolvePP(input);
     if (pp == null) {
-      pp =
-        calcPP(
-          input.from_airport,
-          input.to_airport,
-          input.cabin,
-          input.fare_type,
-          input.flown_at
-        ) ?? 0;
-    }
-    if (pp === 0) {
       errs += 1;
       return {
         index: i + 1,
