@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { FlightStatus } from "~~/shared/schema";
+import { todayISO } from "~~/shared/pp";
 
 const props = defineProps<{ status: FlightStatus; flownAt: string }>();
 
-const today = new Date().toISOString().slice(0, 10);
+const today = todayISO();
 
 // confirmed は搭乗日が過去なら「搭乗済み」、未来なら「搭乗確定」。tentative は常に「未予約」。
 const kind = computed<"done" | "upcoming" | "tentative">(() => {

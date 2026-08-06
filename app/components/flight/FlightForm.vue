@@ -15,6 +15,7 @@ import {
   type FareType,
 } from "~~/shared/routes";
 import { AIRPORTS } from "~~/shared/airports";
+import { DOMESTIC_ROUTE_MULTIPLIER, todayISO } from "~~/shared/pp";
 
 const props = defineProps<{
   initialValues?: Partial<FlightInput>;
@@ -29,7 +30,7 @@ const emit = defineEmits<{
   delete: [];
 }>();
 
-const today = new Date().toISOString().slice(0, 10);
+const today = todayISO();
 
 const { handleSubmit, values, errors, defineField, resetForm } = useForm<FlightInput>({
   validationSchema: toTypedSchema(flightInputSchema),
@@ -108,7 +109,7 @@ watch(isRoundTrip, (enabled) => {
 });
 
 const {
-  route,
+  breakdown,
   pp: autoPP,
   isNewEra,
 } = usePPCalc(
@@ -161,25 +162,6 @@ const projectedPct = computed(() => {
 
 // 運賃の一覧・表示名は shared/routes.ts が定義元。運賃を増やしても勝手に追従する。
 const FARE_OPTIONS = FARE_TYPES.map((value) => ({ value, label: FARE_TYPE_LABELS[value] }));
-
-// 表示用: 選択中の運賃 × クラス × 搭乗日 から積算率と搭乗ポイントを逆算
-const fareBreakdown = computed(() => {
-  const miles = route.value?.baseMiles ?? 0;
-  const auto = autoPP.value;
-  if (!miles || auto == null) return { rate: "—", bonus: 0 };
-  // 全運賃の搭乗ポイントは 0/100/200/400 のいずれか。autoPP から逆算する。
-  const candidates = [0, 100, 200, 400];
-  for (const bonus of candidates) {
-    const accrued = auto - bonus;
-    if (accrued < 0) continue;
-    const ratePct = (accrued / (miles * 2)) * 100;
-    const rounded = Math.round(ratePct);
-    if (Math.abs(rounded - ratePct) < 0.6 && rounded >= 30 && rounded <= 150) {
-      return { rate: `${rounded}%`, bonus };
-    }
-  }
-  return { rate: "—", bonus: 0 };
-});
 
 const onSubmit = handleSubmit((v) => {
   // 二重送信ガード: 検証が非同期なため :disabled="busy" だけでは
@@ -536,19 +518,19 @@ const onSubmit = handleSubmit((v) => {
               </tr>
               <tr>
                 <td class="lbl">基本マイル</td>
-                <td class="val">{{ route?.baseMiles?.toLocaleString() ?? "—" }}</td>
+                <td class="val">{{ breakdown?.baseMiles?.toLocaleString() ?? "—" }}</td>
               </tr>
               <tr>
                 <td class="lbl">積算率</td>
-                <td class="val">{{ fareBreakdown.rate }}</td>
+                <td class="val">{{ breakdown ? `${breakdown.rate}%` : "—" }}</td>
               </tr>
               <tr>
                 <td class="lbl">路線倍率</td>
-                <td class="val">×2</td>
+                <td class="val">×{{ breakdown?.multiplier ?? DOMESTIC_ROUTE_MULTIPLIER }}</td>
               </tr>
               <tr>
                 <td class="lbl">搭乗ポイント</td>
-                <td class="val">+{{ fareBreakdown.bonus }}</td>
+                <td class="val">+{{ breakdown?.boarding ?? 0 }}</td>
               </tr>
               <tr>
                 <td class="lbl">運賃体系</td>
