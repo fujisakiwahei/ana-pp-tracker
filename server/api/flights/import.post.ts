@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { serverSupabaseServiceRole } from "#supabase/server";
+import { serverSupabaseClient } from "#supabase/server";
 import { requireUser } from "~~/server/utils/auth";
 import { flightInputSchema } from "~~/shared/schema";
 import { calcPP } from "~~/shared/pp";
@@ -11,7 +11,7 @@ interface RowError {
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);
-  const client = serverSupabaseServiceRole(event);
+  const client = await serverSupabaseClient(event);
 
   const parts = await readMultipartFormData(event);
   const file = parts?.find((p) => p.name === "file" || p.filename);

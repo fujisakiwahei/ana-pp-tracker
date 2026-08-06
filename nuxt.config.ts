@@ -23,7 +23,9 @@ export default defineNuxtConfig({
   supabase: {
     url: process.env.SUPABASE_URL,
     key: process.env.SUPABASE_PUBLISHABLE_KEY,
-    serviceKey: process.env.SUPABASE_SECRET_KEY,
+    // serviceKey は意図的に渡さない。RLS をバイパスする Service Role は
+    // どのハンドラでも使っておらず、渡さなければ誤用も起こらない。
+    // 将来ユーザーのセッション外で動く管理処理が必要になったら復活させる。
     redirectOptions: {
       login: "/login",
       callback: "/confirm",
