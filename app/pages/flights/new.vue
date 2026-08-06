@@ -11,8 +11,8 @@ async function onSubmit(values: FlightCreateInput) {
   try {
     await create(values);
     await navigateTo("/flights");
-  } catch (e: any) {
-    error.value = e?.statusMessage ?? e?.message ?? "保存に失敗しました";
+  } catch (e) {
+    error.value = toErrorMessage(e, "保存に失敗しました");
   } finally {
     busy.value = false;
   }

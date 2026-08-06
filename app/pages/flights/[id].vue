@@ -38,8 +38,8 @@ async function onSubmit(values: FlightCreateInput) {
   try {
     await update(id, values);
     await navigateTo("/flights");
-  } catch (e: any) {
-    error.value = e?.statusMessage ?? e?.message ?? "保存に失敗しました";
+  } catch (e) {
+    error.value = toErrorMessage(e, "保存に失敗しました");
   } finally {
     busy.value = false;
   }
@@ -51,8 +51,8 @@ async function onDelete() {
   try {
     await remove(id);
     await navigateTo("/flights");
-  } catch (e: any) {
-    error.value = e?.statusMessage ?? e?.message ?? "削除に失敗しました";
+  } catch (e) {
+    error.value = toErrorMessage(e, "削除に失敗しました");
   } finally {
     busy.value = false;
   }

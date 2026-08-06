@@ -2,7 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2026-01-01",
   future: { compatibilityVersion: 4 },
 
-  modules: ["@nuxtjs/supabase", "@vee-validate/nuxt"],
+  modules: ["@nuxtjs/supabase", "@vee-validate/nuxt", "@nuxt/eslint"],
 
   components: [{ path: "~/components", pathPrefix: false }],
 

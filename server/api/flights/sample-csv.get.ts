@@ -14,5 +14,6 @@ export default defineEventHandler((event) => {
     "content-disposition",
     'attachment; filename="ana-pp-sample.csv"',
   );
-  return "﻿" + csv;
+  // Excel で開いたときに文字化けしないよう BOM を先頭に付ける。
+  return "\uFEFF" + csv;
 });

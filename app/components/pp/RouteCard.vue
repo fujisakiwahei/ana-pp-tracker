@@ -13,7 +13,8 @@ const props = withDefaults(
     fareType?: FareType;
     flownAt?: string;
   }>(),
-  { fareType: "simple" }
+  // flownAt 未指定なら「今日」で試算する (下の ppOneWay 側でフォールバック)。
+  { fareType: "simple", flownAt: undefined }
 );
 
 const ppOneWay = computed(() => {

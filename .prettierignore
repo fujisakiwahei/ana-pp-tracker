@@ -1,0 +1,15 @@
+.nuxt
+.output
+.data
+.nitro
+.cache
+dist
+node_modules
+pnpm-lock.yaml
+
+# デザイン検討用のモックアップ (アプリのビルド対象外)
+design-tone
+
+# main.scss のコンパイル済み出力
+main.css
+main.css.map

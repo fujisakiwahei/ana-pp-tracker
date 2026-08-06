@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 
-export interface ParsedCsvRow extends Record<string, string> {}
+export type ParsedCsvRow = Record<string, string>;
 
 export function useCsv() {
   const parseFile = (file: File) =>

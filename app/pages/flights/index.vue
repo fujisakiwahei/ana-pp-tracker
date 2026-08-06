@@ -15,7 +15,7 @@ const yearOptions = computed(() => {
   return years;
 });
 
-const { data, refresh } = await useFetch<{ items: FlightRow[]; total: number; year: number }>(
+const { data } = await useFetch<{ items: FlightRow[]; total: number; year: number }>(
   "/api/flights",
   {
     query: computed(() => ({ year: year.value, limit: 500 })),

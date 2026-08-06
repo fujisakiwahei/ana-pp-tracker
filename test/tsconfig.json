@@ -1,0 +1,9 @@
+{
+  // テストは shared/ を直接 import するだけなので、Nuxt の shared 用設定を流用する。
+  // これにより calcPP("XXX", ...) のような不正な引数がテストコード側でも型エラーになる。
+  "extends": "../.nuxt/tsconfig.shared.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["./**/*.ts", "../shared/**/*"]
+}
