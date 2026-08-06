@@ -6,8 +6,15 @@ import {
   type FlightInput,
   type ReturnFlightInput,
 } from "~~/shared/schema";
-import type { AirportCode, CabinClass, FareType } from "~~/shared/routes";
-import { AIRPORTS, AIRPORT_CODES } from "~~/shared/airports";
+import {
+  FARE_TYPES,
+  FARE_TYPE_LABELS,
+  SELECTABLE_AIRPORT_CODES,
+  type AirportCode,
+  type CabinClass,
+  type FareType,
+} from "~~/shared/routes";
+import { AIRPORTS } from "~~/shared/airports";
 
 const props = defineProps<{
   initialValues?: Partial<FlightInput>;
@@ -152,16 +159,8 @@ const projectedPct = computed(() => {
   return (addedPP.value / goal) * 100;
 });
 
-const FARE_OPTIONS = [
-  { value: "flex", label: "フレックス" },
-  { value: "biz", label: "ビジネスきっぷ / Biz" },
-  { value: "standard", label: "スタンダード" },
-  { value: "simple", label: "シンプル" },
-  { value: "sale", label: "セール運賃" },
-  { value: "ana_card", label: "ANAカード優待割引" },
-  { value: "stockholder", label: "株主優待割引" },
-  { value: "shimin", label: "島民割引" },
-];
+// 運賃の一覧・表示名は shared/routes.ts が定義元。運賃を増やしても勝手に追従する。
+const FARE_OPTIONS = FARE_TYPES.map((value) => ({ value, label: FARE_TYPE_LABELS[value] }));
 
 // 表示用: 選択中の運賃 × クラス × 搭乗日 から積算率と搭乗ポイントを逆算
 const fareBreakdown = computed(() => {
@@ -296,7 +295,7 @@ const onSubmit = handleSubmit((v) => {
                 v-bind="fromAirportAttrs"
                 required
               >
-                <option v-for="c in AIRPORT_CODES" :key="c" :value="c">
+                <option v-for="c in SELECTABLE_AIRPORT_CODES" :key="c" :value="c">
                   {{ c }} · {{ AIRPORTS[c].name }}
                 </option>
               </select>
@@ -314,7 +313,7 @@ const onSubmit = handleSubmit((v) => {
                 v-bind="toAirportAttrs"
                 required
               >
-                <option v-for="c in AIRPORT_CODES" :key="c" :value="c">
+                <option v-for="c in SELECTABLE_AIRPORT_CODES" :key="c" :value="c">
                   {{ c }} · {{ AIRPORTS[c].name }}
                 </option>
               </select>
