@@ -26,7 +26,7 @@ const filtered = computed(() => {
   const items = data.value?.items ?? [];
   return items.filter((f) => {
     if (cabin.value !== "all" && f.cabin !== cabin.value) return false;
-    if (status.value !== "all" && (f.status ?? "confirmed") !== status.value) return false;
+    if (status.value !== "all" && f.status !== status.value) return false;
     if (hub.value !== "all") {
       if (f.from_airport !== hub.value && f.to_airport !== hub.value) return false;
     }
@@ -36,7 +36,7 @@ const filtered = computed(() => {
 
 const confirmedPP = computed(() =>
   filtered.value
-    .filter((f) => (f.status ?? "confirmed") !== "tentative")
+    .filter((f) => f.status !== "tentative")
     .reduce((s, f) => s + f.pp, 0)
 );
 const tentativePP = computed(() =>

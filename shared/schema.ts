@@ -113,9 +113,7 @@ export const flightCreateInputSchema = z
 
 export type FlightCreateInput = z.infer<typeof flightCreateInputSchema>;
 
-export interface FlightRow extends FlightInput {
-  id: string;
-  user_id: string;
-  pp: number;
-  created_at: string;
-}
+// flights テーブルの行の型は shared/database.types.ts が定義元。
+// 以前はここにも手書きの FlightRow があり、DB側の FlightRecord と
+// 二重定義になっていた (前者は AirportCode、後者は string で不一致)。
+export type { FlightRow } from "./database.types";
