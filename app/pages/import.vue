@@ -100,15 +100,13 @@ async function doImport() {
 </script>
 
 <template>
-  <div class="subheader">
-    <div>
-      <div class="subhead-jp">一括登録</div>
-      <h1 class="section-title page-title">CSVから取り込む</h1>
-    </div>
-    <a href="/api/flights/sample-csv" class="btn btn-ghost" download>
-      ↓ サンプルCSVをダウンロード
-    </a>
-  </div>
+  <PageHeader eyebrow="一括登録" title="CSVから取り込む">
+    <template #actions>
+      <a href="/api/flights/sample-csv" class="btn btn-ghost" download>
+        ↓ サンプルCSVをダウンロード
+      </a>
+    </template>
+  </PageHeader>
 
   <div class="page-body">
     <p class="lede">
@@ -153,25 +151,6 @@ async function doImport() {
 </template>
 
 <style lang="scss" scoped>
-.page-title {
-  font-size: 32px;
-  @media (min-width: 768px) {
-    font-size: 40px;
-  }
-}
-.subhead-jp {
-  font-size: 12px;
-  color: var(--ink-mute);
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
-}
-.lede {
-  margin: 0 0 24px;
-  font-size: 13px;
-  color: var(--ink-mute);
-  line-height: 1.7;
-  max-width: 720px;
-}
 .preview-title {
   font-size: 12px;
   color: var(--ink-mute);

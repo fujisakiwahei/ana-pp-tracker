@@ -519,6 +519,21 @@ ana-pp-tracker/
         └── 20260101000000_create_flights.sql
 ```
 
+### 設計メモ
+
+- **共通データは `shared/` に置く**。ハードコードした路線ごとのPPテーブルのように、フロントからもサーバからも参照したいデータは `shared/` に入れると両方から `import` できる（Nuxt 4 の標準ディレクトリ）。
+- **`ROUTES` のような全大文字は「変更されない定数」を表す慣習**。`shared/` 配下のマスタデータはこの命名で統一している。
+
+### リポジトリ直下のその他のディレクトリ
+
+| パス | 役割 |
+| --- | --- |
+| `docs/design-tone/` | 実装前のデザイン検討用モックアップ（React/JSX）。アプリのビルド対象外。詳細は [docs/design-tone/README.md](docs/design-tone/README.md) |
+| `test/fixtures/` | CSVインポートの動作確認用サンプル |
+| `supabase/migrations/` | Supabase のマイグレーションSQL |
+
+> アプリのスタイルの正は `app/assets/styles/main.scss`。以前リポジトリ直下にあった `main.css` はそのコンパイル済み出力で、どこからも参照されていなかったため削除し `.gitignore` に登録した。
+
 ### 主要設定: `nuxt.config.ts`
 
 ```ts

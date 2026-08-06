@@ -88,11 +88,57 @@ function resolveRate(
   return cabin === "first" ? entry.first : entry.economy;
 }
 
+/** 片道PPの内訳。UI が「積算率」「搭乗ポイント」を表示するために使う。 */
+export interface PPBreakdown {
+  /** 区間基本マイル */
+  baseMiles: number;
+  /** 積算率 (% 単位、例: 75 = 75%) */
+  rate: number;
+  /** 路線倍率 (国内線は常に 2) */
+  multiplier: number;
+  /** 積算マイル分のPP（端数切り捨て後） */
+  accrued: number;
+  /** 搭乗ポイント (片道) */
+  boarding: number;
+  /** 合計PP = accrued + boarding */
+  total: number;
+  /** 新運賃体系 (2026/5/19 搭乗〜) か */
+  isNewEra: boolean;
+}
+
 /**
- * 片道PPを計算。
+ * 片道PPを内訳付きで計算。
  * 式: floor(baseMiles × 積算率 × 路線倍率(=2)) + 搭乗ポイント
  * ※ ANA は端数切り捨て（例: FUK-OKA 537mi × 75% × 2 = 805.5 → 805 PP）。
+ *
+ * 合計だけでなく内訳を返すのは、UI が積算率と搭乗ポイントを表示するため。
+ * 以前は合計PPからそれらを逆算していたが、`accrued + boarding = total` は
+ * 解が一意に定まらず、実際に 328通り中177通りで誤った値を表示していた。
  */
+export function calcPPBreakdown(
+  from: AirportCode,
+  to: AirportCode,
+  cabin: CabinClass,
+  fareType: FareType | undefined,
+  flownAt: string,
+): PPBreakdown | null {
+  const route = findRoute(from, to);
+  if (!route) return null;
+  const lane = resolveRate(flownAt, cabin, fareType);
+  if (!lane) return null;
+  const accrued = Math.floor(route.baseMiles * (lane.rate / 100) * DOMESTIC_ROUTE_MULTIPLIER);
+  return {
+    baseMiles: route.baseMiles,
+    rate: lane.rate,
+    multiplier: DOMESTIC_ROUTE_MULTIPLIER,
+    accrued,
+    boarding: lane.boarding,
+    total: accrued + lane.boarding,
+    isNewEra: isNewFareEra(flownAt),
+  };
+}
+
+/** 片道PPの合計だけが必要なとき用。内訳が要るなら calcPPBreakdown を使う。 */
 export function calcPP(
   from: AirportCode,
   to: AirportCode,
@@ -100,12 +146,7 @@ export function calcPP(
   fareType: FareType | undefined,
   flownAt: string,
 ): number | null {
-  const route = findRoute(from, to);
-  if (!route) return null;
-  const lane = resolveRate(flownAt, cabin, fareType);
-  if (!lane) return null;
-  const accrued = Math.floor(route.baseMiles * (lane.rate / 100) * DOMESTIC_ROUTE_MULTIPLIER);
-  return accrued + lane.boarding;
+  return calcPPBreakdown(from, to, cabin, fareType, flownAt)?.total ?? null;
 }
 
 export function roundTripsNeeded(remaining: number, ppRoundTrip: number): number {
@@ -154,7 +195,8 @@ export function getSuggestions(
   return list;
 }
 
-function todayISO(): string {
+/** 今日の日付 (YYYY-MM-DD)。搭乗日の既定値・過去判定に使う。 */
+export function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
@@ -162,12 +204,13 @@ export function getCurrentYear(): number {
   return new Date().getFullYear();
 }
 
-export function buildAnaReservationUrl(
-  _from: AirportCode,
-  _to: AirportCode,
-): string {
-  return "https://www.ana.co.jp/ja/jp/";
-}
+/**
+ * 路線カードからの予約導線。
+ * 区間を指定したディープリンクの仕様が公開されていないため、ANA のトップページに送る。
+ * (以前は from/to を受け取りながら両方とも捨てて固定URLを返す関数で、
+ *  区間ごとにURLが変わるかのように見えるシグネチャになっていた)
+ */
+export const ANA_RESERVATION_URL = "https://www.ana.co.jp/ja/jp/";
 
 /**
  * 入力から実際に記録するPPを決める。

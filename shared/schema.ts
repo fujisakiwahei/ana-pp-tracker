@@ -1,51 +1,30 @@
 import { z } from "zod";
+import { AIRPORT_CODES } from "./airports";
+import { CABIN_CLASSES, FARE_TYPES } from "./routes";
 
-export const airportCodeSchema = z.enum([
-  "HND",
-  "NRT",
-  "FUK",
-  "OKA",
-  "CTS",
-  "ITM",
-  "KIX",
-  "NGO",
-  "SDJ",
-  "HIJ",
-  "KMJ",
-  "KOJ",
-  "NGS",
-  "MYJ",
-  "OKJ",
-  "HKD",
-  "ISG",
-  "MMY",
-  "KMI",
-  "OIT",
-  "WKJ",
-  "KUH",
-  "SHB",
-]);
+// 値リストの定義元は airports.ts / routes.ts。ここでは Zod スキーマに包むだけにして、
+// 「TS の union」と「z.enum」を二重管理しないようにする。
+export const airportCodeSchema = z.enum(AIRPORT_CODES);
 
-export const cabinClassSchema = z.enum(["economy", "first"]);
+export const cabinClassSchema = z.enum(CABIN_CLASSES);
 
-export const flightStatusSchema = z.enum(["confirmed", "tentative"]);
+export const fareTypeSchema = z.enum(FARE_TYPES);
+
+export const FLIGHT_STATUSES = ["confirmed", "tentative"] as const;
+export const flightStatusSchema = z.enum(FLIGHT_STATUSES);
 export type FlightStatus = z.infer<typeof flightStatusSchema>;
-
-export const fareTypeSchema = z.enum([
-  "flex",
-  "biz",
-  "standard",
-  "simple",
-  "sale",
-  "ana_card",
-  "stockholder",
-  "shimin",
-]);
 
 const emptyToUndefined = <T extends z.ZodTypeAny>(s: T) =>
   z.preprocess((v) => (v === "" || v === null ? undefined : v), s);
 
-const optionalString = (max = 40) => emptyToUndefined(z.string().trim().max(max).optional());
+const optionalString = (max = 40) =>
+  emptyToUndefined(
+    z
+      .string()
+      .trim()
+      .max(max, { message: `${max}文字以内で入力してください` })
+      .optional()
+  );
 
 /** 出発地と到着地が同じレコードを弾く。フォーム用・CSV用の両スキーマで共有する。 */
 const differentAirports = {

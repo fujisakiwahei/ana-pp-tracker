@@ -1,38 +1,50 @@
-export type CabinClass = "economy" | "first";
-export type AirportCode =
-  | "HND"
-  | "NRT"
-  | "FUK"
-  | "OKA"
-  | "CTS"
-  | "ITM"
-  | "KIX"
-  | "NGO"
-  | "SDJ"
-  | "HIJ"
-  | "KMJ"
-  | "KOJ"
-  | "NGS"
-  | "MYJ"
-  | "OKJ"
-  | "HKD"
-  | "ISG"
-  | "MMY"
-  | "KMI"
-  | "OIT"
-  | "WKJ"
-  | "KUH"
-  | "SHB";
+import { AIRPORT_CODES, type AirportCode } from "./airports";
 
-export type FareType =
-  | "flex"
-  | "biz"
-  | "standard"
-  | "simple"
-  | "sale"
-  | "ana_card"
-  | "stockholder"
-  | "shimin";
+// 空港コードの定義元は airports.ts。従来どおり routes.ts からも型を参照できるよう再エクスポートする。
+export type { AirportCode };
+
+/** 座席クラス。**値リストの唯一の定義元**で、Zod の cabinClassSchema もここから導出する。 */
+export const CABIN_CLASSES = ["economy", "first"] as const;
+export type CabinClass = (typeof CABIN_CLASSES)[number];
+
+/** 座席クラスの表示名。Record<CabinClass, string> なのでクラス追加時にラベルが型で強制される。 */
+export const CABIN_LABELS: Record<CabinClass, string> = {
+  economy: "エコノミー",
+  first: "プレミアム",
+};
+
+/** Segmented / select にそのまま渡せるクラス選択肢。 */
+export const CABIN_OPTIONS: Array<{ value: CabinClass; label: string }> = CABIN_CLASSES.map(
+  (value) => ({ value, label: CABIN_LABELS[value] })
+);
+
+/** 運賃種別。**値リストの唯一の定義元**で、Zod の fareTypeSchema もここから導出する。 */
+export const FARE_TYPES = [
+  "flex",
+  "biz",
+  "standard",
+  "simple",
+  "sale",
+  "ana_card",
+  "stockholder",
+  "shimin",
+] as const;
+export type FareType = (typeof FARE_TYPES)[number];
+
+/**
+ * 運賃種別の表示名。
+ * `Record<FareType, string>` なので、運賃を増やすとラベルの追加が型で強制される。
+ */
+export const FARE_TYPE_LABELS: Record<FareType, string> = {
+  flex: "フレックス",
+  biz: "ビジネスきっぷ / Biz",
+  standard: "スタンダード",
+  simple: "シンプル",
+  sale: "セール運賃",
+  ana_card: "ANAカード優待割引",
+  stockholder: "株主優待割引",
+  shimin: "島民割引",
+};
 
 export interface Route {
   from: AirportCode;
@@ -88,3 +100,21 @@ export const ROUTES: Route[] = [
   { from: "OKA", to: "MMY", baseMiles: 177 },
   { from: "OKA", to: "ISG", baseMiles: 247 },
 ];
+
+/**
+ * 拠点空港。路線一覧のタブと搭乗履歴の絞り込みで共有する。
+ * (ROUTES はこの3空港を起点に組んである)
+ */
+export const HUB_AIRPORT_CODES: AirportCode[] = ["HND", "FUK", "OKA"];
+
+/**
+ * フォームで選べる空港。**ROUTES に登場する空港だけ**を空港マスタの順で返す。
+ *
+ * 空港マスタに載っていても路線データが無い空港 (現状は NRT) は、選んでも
+ * calcPP() が null を返して保存時に400になる。手で一覧を書くとまたズレるので、
+ * ROUTES から導出して「選べる = 保存できる」を保証する。
+ * NRT を使いたくなったら ROUTES に成田路線を追加すれば自動で選択肢に出る。
+ */
+export const SELECTABLE_AIRPORT_CODES: AirportCode[] = AIRPORT_CODES.filter((code) =>
+  ROUTES.some((r) => r.from === code || r.to === code)
+);
