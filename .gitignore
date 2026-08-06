@@ -6,6 +6,11 @@
 .cache
 dist
 
+# SCSS のコンパイル済み出力
+# 正は app/assets/styles/main.scss。nuxt.config.ts もそちらを参照している。
+/main.css
+/main.css.map
+
 # Node dependencies
 node_modules
 
