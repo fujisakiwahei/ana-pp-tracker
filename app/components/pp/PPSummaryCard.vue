@@ -2,16 +2,19 @@
 const props = defineProps<{
   confirmedPP: number;
   tentativePP: number;
+  boardedPP: number;
   goalPP: number;
   remainingPP: number;
   progress: number;
   tentativeProgress: number;
+  boardedProgress: number;
   confirmedCount: number;
   tentativeCount: number;
 }>();
 
-// 確定ぶんは実線塗り、未予約ぶんはその右に薄色で継ぎ足し。
+// 下から「確定」「未予約」、一番上に「搭乗済」。搭乗済は確定の左端に重ねる。
 const confirmedPct = computed(() => Math.min(100, props.progress * 100));
+const boardedPct = computed(() => Math.min(100, props.boardedProgress * 100));
 const tentativePct = computed(() =>
   Math.max(0, Math.min(100, props.tentativeProgress * 100) - confirmedPct.value)
 );
@@ -38,6 +41,7 @@ const projectedPP = computed(() => props.confirmedPP + props.tentativePP);
           class="progress-ghost"
           :style="{ left: `${confirmedPct}%`, width: `${tentativePct}%` }"
         />
+        <div v-if="boardedPct > 0" class="progress-boarded" :style="{ width: `${boardedPct}%` }" />
       </div>
       <div class="ticks">
         <span>0 PP</span>
@@ -45,6 +49,7 @@ const projectedPP = computed(() => props.confirmedPP + props.tentativePP);
         <span>プラチナ 50,000</span>
       </div>
       <div class="legend">
+        <span class="key"><i class="sw sw-boarded" />搭乗済</span>
         <span class="key"><i class="sw sw-confirmed" />確定</span>
         <span class="key"><i class="sw sw-tentative" />未予約（見込み）</span>
       </div>
@@ -73,15 +78,26 @@ const projectedPP = computed(() => props.confirmedPP + props.tentativePP);
           ><span class="unit">%</span>
         </div>
       </div>
+      <div>
+        <div class="lbl">搭乗済</div>
+        <div class="metric">
+          <span class="mono">{{ boardedPP.toLocaleString() }}</span
+          ><span class="unit">PP</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .summary {
+  --boarded-fill: color-mix(in oklab, var(--ana-bright) 55%, var(--ana-sky));
   display: flex;
   flex-direction: column;
   gap: 22px;
+}
+.progress-fill {
+  z-index: 1;
 }
 .big {
   display: flex;
@@ -131,10 +147,20 @@ const projectedPP = computed(() => props.confirmedPP + props.tentativePP);
   margin: 0 4px;
   opacity: 0.6;
 }
+.progress-boarded {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  background: var(--boarded-fill);
+  transition: width 0.6s ease-out;
+}
 .progress-ghost {
   position: absolute;
   top: 0;
   bottom: 0;
+  z-index: 1;
   background: repeating-linear-gradient(
     45deg,
     color-mix(in oklab, var(--ana-sky) 60%, transparent),
@@ -164,6 +190,9 @@ const projectedPP = computed(() => props.confirmedPP + props.tentativePP);
   height: 8px;
   border-radius: 1px;
   display: inline-block;
+}
+.legend .sw-boarded {
+  background: var(--boarded-fill);
 }
 .legend .sw-confirmed {
   background: linear-gradient(90deg, var(--ana-blue), var(--ana-bright));

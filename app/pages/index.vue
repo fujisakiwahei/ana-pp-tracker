@@ -39,10 +39,12 @@ const userName = computed(() => {
       <PPSummaryCard
         :confirmed-p-p="stats.confirmedPP"
         :tentative-p-p="stats.tentativePP"
+        :boarded-p-p="stats.boardedPP"
         :goal-p-p="stats.goalPP"
         :remaining-p-p="stats.remainingPP"
         :progress="stats.progress"
         :tentative-progress="stats.tentativeProgress"
+        :boarded-progress="stats.boardedProgress"
         :confirmed-count="stats.confirmedCount"
         :tentative-count="stats.tentativeCount"
       />
