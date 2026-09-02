@@ -2,10 +2,12 @@ export interface SummaryResponse {
   year: number;
   confirmedPP: number;
   tentativePP: number;
+  boardedPP: number;
   goalPP: number;
   remainingPP: number;
   progress: number;
   tentativeProgress: number;
+  boardedProgress: number;
   flightsCount: number;
   confirmedCount: number;
   tentativeCount: number;
