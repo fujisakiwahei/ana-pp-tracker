@@ -13,11 +13,27 @@ export interface SummaryResponse {
   tentativeCount: number;
 }
 
-export function usePPStats(year?: MaybeRefOrGetter<number | undefined>) {
-  return useFetch<SummaryResponse>("/api/stats/summary", {
-    query: computed(() => {
+/**
+ * 年間サマリー。
+ *
+ * useFetch から useAsyncData + $fetch に変えてある。Authorization ヘッダを
+ * リクエストの都度 (= トークン更新後も正しい値で) 組み立てる必要があるため。
+ *
+ * key は呼び出し側で分ける。同じ key を別々のオプションで使うと
+ * Nuxt が片方のオプションを黙って捨てる。
+ */
+export function usePPStats(year?: MaybeRefOrGetter<number | undefined>, key = "pp-summary") {
+  const { apiUrl, authHeaders } = useApi();
+
+  return useAsyncData<SummaryResponse>(
+    key,
+    () => {
       const y = toValue(year);
-      return y ? { year: y } : {};
-    }),
-  });
+      return $fetch<SummaryResponse>(apiUrl("/stats/summary"), {
+        headers: authHeaders(),
+        query: y ? { year: y } : {},
+      });
+    },
+    { watch: [() => toValue(year)] }
+  );
 }

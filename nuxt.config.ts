@@ -2,6 +2,19 @@ export default defineNuxtConfig({
   compatibilityDate: "2026-01-01",
   future: { compatibilityVersion: 4 },
 
+  // API は別オリジンの Worker (apps/api) に移したので、サーバ側で描く materialが無い。
+  // 認証も Bearer トークンのみ (Cookie を使わない) にしたため、SSR のまま残すと
+  // サーバ側にセッションが無い状態で描画することになる。SPA に倒す。
+  // 1人用アプリなので SEO も初期表示速度も要件ではない。
+  ssr: false,
+
+  runtimeConfig: {
+    public: {
+      // 本番は NUXT_PUBLIC_API_BASE で上書きする。既定は wrangler dev の待ち受け先。
+      apiBase: "http://localhost:8787",
+    },
+  },
+
   modules: ["@nuxtjs/supabase", "@vee-validate/nuxt", "@nuxt/eslint"],
 
   components: [{ path: "~/components", pathPrefix: false }],
@@ -39,5 +52,4 @@ export default defineNuxtConfig({
   },
 
   css: ["~/assets/styles/main.scss"],
-
 });

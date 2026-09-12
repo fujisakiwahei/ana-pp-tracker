@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AirportCode, CabinClass } from "@ana/core/routes";
-import type { FlightRow, FlightStatus } from "@ana/core/schema";
+import type { FlightStatus } from "@ana/core/schema";
 import { getCurrentYear } from "@ana/core/pp";
 
 const currentYear = getCurrentYear();
@@ -15,12 +15,9 @@ const yearOptions = computed(() => {
   return years;
 });
 
-const { data } = await useFetch<{ items: FlightRow[]; total: number; year: number }>(
-  "/api/flights",
-  {
-    query: computed(() => ({ year: year.value, limit: 500 })),
-  }
-);
+const { list } = useFlights();
+const { data } = await useAsyncData("flights-list", () => list({ year: year.value, limit: 500 }));
+watch(year, () => refreshNuxtData("flights-list"));
 
 const filtered = computed(() => {
   const items = data.value?.items ?? [];
@@ -35,9 +32,7 @@ const filtered = computed(() => {
 });
 
 const confirmedPP = computed(() =>
-  filtered.value
-    .filter((f) => f.status !== "tentative")
-    .reduce((s, f) => s + f.pp, 0)
+  filtered.value.filter((f) => f.status !== "tentative").reduce((s, f) => s + f.pp, 0)
 );
 const tentativePP = computed(() =>
   filtered.value.filter((f) => f.status === "tentative").reduce((s, f) => s + f.pp, 0)
@@ -48,17 +43,17 @@ const tentativePP = computed(() =>
   <PageHeader :eyebrow="`${year}年の記録`" title="搭乗履歴">
     <template #actions>
       <div class="controls">
-      <FlightFilters
-        :year="year"
-        :cabin="cabin"
-        :hub="hub"
-        :status="status"
-        :year-options="yearOptions"
-        @update:year="year = $event"
-        @update:cabin="cabin = $event"
-        @update:hub="hub = $event"
-        @update:status="status = $event"
-      />
+        <FlightFilters
+          :year="year"
+          :cabin="cabin"
+          :hub="hub"
+          :status="status"
+          :year-options="yearOptions"
+          @update:year="year = $event"
+          @update:cabin="cabin = $event"
+          @update:hub="hub = $event"
+          @update:status="status = $event"
+        />
         <NuxtLink to="/flights/new" class="btn">+ 新規登録</NuxtLink>
       </div>
     </template>

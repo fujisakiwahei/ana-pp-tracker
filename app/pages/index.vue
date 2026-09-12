@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { getCurrentYear, getSuggestions } from "@ana/core/pp";
 import { CABIN_OPTIONS, type CabinClass } from "@ana/core/routes";
-import type { FlightRow } from "@ana/core/schema";
 
 const user = useSupabaseUser();
 const year = ref(getCurrentYear());
 const suggestionCabin = ref<CabinClass>("economy");
 const { data: stats } = await usePPStats(year);
 
-const { data: flightList } = await useFetch<{ items: FlightRow[]; total: number; year: number }>(
-  "/api/flights",
-  {
-    query: computed(() => ({ year: year.value, limit: 5 })),
-  }
+const { list } = useFlights();
+const { data: flightList } = await useAsyncData("dashboard-recent-flights", () =>
+  list({ year: year.value, limit: 5 })
 );
+watch(year, () => refreshNuxtData("dashboard-recent-flights"));
 
 const recentFlights = computed(() => flightList.value?.items ?? []);
 const suggestions = computed(() => {

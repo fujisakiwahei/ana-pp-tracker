@@ -18,10 +18,8 @@ const props = defineProps<{
 const { defineField, errors } = useFormContext<FlightInput>();
 const [pp, ppAttrs] = defineField("pp");
 
-const summary = useFetch<{ confirmedPP: number; goalPP: number }>("/api/stats/summary", {
-  lazy: true,
-  default: () => ({ confirmedPP: 0, goalPP: GOAL_PP }),
-});
+// フォーム表示をブロックしない。サマリーが来るまでは目標値だけで描く。
+const summary = usePPStats(undefined, "flight-form-summary");
 
 const goalPP = computed(() => summary.data.value?.goalPP ?? GOAL_PP);
 const projectedTotal = computed(() => (summary.data.value?.confirmedPP ?? 0) + props.totals.added);

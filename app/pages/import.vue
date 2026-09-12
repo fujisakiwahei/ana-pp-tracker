@@ -4,7 +4,7 @@ import { csvFlightInputSchema } from "@ana/core/schema";
 import { resolvePP } from "@ana/core/pp";
 
 const { parseFile } = useCsv();
-const { importCsv } = useFlights();
+const { importCsv, sampleCsvUrl } = useFlights();
 
 const file = ref<File | null>(null);
 const previewRows = ref<PreviewRow[]>([]);
@@ -102,9 +102,7 @@ async function doImport() {
 <template>
   <PageHeader eyebrow="一括登録" title="CSVから取り込む">
     <template #actions>
-      <a href="/api/flights/sample-csv" class="btn btn-ghost" download>
-        ↓ サンプルCSVをダウンロード
-      </a>
+      <a :href="sampleCsvUrl()" class="btn btn-ghost" download> ↓ サンプルCSVをダウンロード </a>
     </template>
   </PageHeader>
 
