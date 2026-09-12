@@ -5,12 +5,13 @@
   "type": "module",
   "exports": {
     "./airports": "./src/airports.ts",
-    "./routes": "./src/routes.ts",
+    "./database.types": "./src/database.types.ts",
+    "./flightRow": "./src/flightRow.ts",
+    "./marketFares": "./src/marketFares.ts",
     "./pp": "./src/pp.ts",
     "./ppSummary": "./src/ppSummary.ts",
-    "./schema": "./src/schema.ts",
-    "./marketFares": "./src/marketFares.ts",
-    "./database.types": "./src/database.types.ts"
+    "./routes": "./src/routes.ts",
+    "./schema": "./src/schema.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

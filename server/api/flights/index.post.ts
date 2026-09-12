@@ -1,7 +1,7 @@
 import { serverSupabaseClient } from "#supabase/server";
 import type { Database } from "@ana/core/database.types";
 import { requireUser } from "~~/server/utils/auth";
-import { toFlightInsertRow, type FlightInsertRow } from "~~/server/utils/flightRow";
+import { toFlightInsertRow, type FlightInsertRow } from "@ana/core/flightRow";
 import {
   flightCreateInputSchema,
   type FlightInput,

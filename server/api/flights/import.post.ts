@@ -2,7 +2,7 @@ import Papa from "papaparse";
 import { serverSupabaseClient } from "#supabase/server";
 import type { Database } from "@ana/core/database.types";
 import { requireUser } from "~~/server/utils/auth";
-import { toFlightInsertRow, type FlightInsertRow } from "~~/server/utils/flightRow";
+import { toFlightInsertRow, type FlightInsertRow } from "@ana/core/flightRow";
 import { csvFlightInputSchema } from "@ana/core/schema";
 import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "@ana/core/pp";
 

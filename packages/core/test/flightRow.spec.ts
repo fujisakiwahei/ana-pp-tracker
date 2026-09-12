@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { csvFlightInputSchema, flightInputSchema, type FlightInput } from "@ana/core/schema";
-import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "@ana/core/pp";
-import { toFlightColumns, toFlightInsertRow } from "../server/utils/flightRow";
+import { csvFlightInputSchema, flightInputSchema, type FlightInput } from "../src/schema";
+import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "../src/pp";
+import { toFlightColumns, toFlightInsertRow } from "../src/flightRow";
 
 const base = {
   flown_at: "2026-05-19",

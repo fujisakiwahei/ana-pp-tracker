@@ -1,7 +1,7 @@
 import { serverSupabaseClient } from "#supabase/server";
 import type { Database } from "@ana/core/database.types";
 import { requireUser } from "~~/server/utils/auth";
-import { toFlightColumns } from "~~/server/utils/flightRow";
+import { toFlightColumns } from "@ana/core/flightRow";
 import { flightInputSchema } from "@ana/core/schema";
 import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "@ana/core/pp";
 

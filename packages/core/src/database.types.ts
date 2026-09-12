@@ -76,7 +76,7 @@ export type FlightRow = Omit<
   fare_type: FareType | null;
 };
 
-/** insert 1件ぶんの列。server/utils/flightRow.ts が組み立てる。 */
+/** insert 1件ぶんの列。flightRow.ts が組み立てる。 */
 export type FlightInsert = FlightsTable["Insert"];
 
 /** update で変更しうる列。id / user_id / created_at は対象外。 */

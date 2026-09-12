@@ -1,5 +1,5 @@
-import type { FlightInput } from "@ana/core/schema";
-import type { FlightInsert } from "@ana/core/database.types";
+import type { FlightInput } from "./schema";
+import type { FlightInsert } from "./database.types";
 
 /**
  * FlightInput を flights テーブルの列に変換する。
