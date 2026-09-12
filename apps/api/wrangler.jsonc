@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ana-pp-tracker-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-12",
+  "observability": { "enabled": true },
+  // SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY / CORS_ORIGIN は
+  // ローカルは .dev.vars、本番は `wrangler secret put` で渡す。
+  // Service Role キーは置かない (RLS をバイパスするため)。
+  "vars": {},
+}

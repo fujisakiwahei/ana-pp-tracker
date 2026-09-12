@@ -11,7 +11,7 @@
     "postinstall": "nuxt prepare",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "nuxt typecheck && tsc -p test/tsconfig.json --noEmit && pnpm -F @ana/core typecheck",
+    "typecheck": "nuxt typecheck && tsc -p test/tsconfig.json --noEmit && pnpm -F @ana/core typecheck && pnpm -F @ana/api typecheck",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

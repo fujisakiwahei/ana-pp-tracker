@@ -21,11 +21,14 @@ Web も残す。策定日: 2026-09-12 / 対象コミット: `ed00195`
 ## 目標構成
 
 ```
-packages/core/   ドメインロジック (旧 shared/)。Nuxt にも Hono にも依存しない
-apps/api/        Hono on Cloudflare Workers
-apps/web/        Nuxt 4 (SPA)。apps/api のクライアント
-ios/             Xcode / SwiftUI
+packages/core/   ドメインロジック (旧 shared/)。Nuxt にも Hono にも依存しない  ✅
+apps/api/        Hono on Cloudflare Workers                                  ✅
+apps/web/        Nuxt 4 (SPA)。apps/api のクライアント        ← 現在リポジトリ直下
+ios/             Xcode / SwiftUI                              ← 未着手
 ```
+
+Nuxt はまだリポジトリ直下にある。`apps/web/` への移動は Phase 2 でまとめて行う
+(先にやると設定ファイルのパスを2度触ることになるため)。
 
 ## フェーズ
 
@@ -41,32 +44,28 @@ ios/             Xcode / SwiftUI
 - テストは分割: ドメインは `packages/core/test/`、Nuxt 側 (`server/utils`, `app/utils`) は `test/`。
   ルートの `vitest.config.ts` が projects で両方を回す。
 
-### Phase 1 — Hono を横に立てる
+### Phase 1 — Hono を横に立てる ✅ 完了
 
-```bash
-pnpm create hono@latest apps/api   # template: cloudflare-workers
-```
+`pnpm create hono@latest apps/api -t cloudflare-workers -p pnpm` で作った Worker に、
+Nuxt の8エンドポイントを移植し `GET /pp/preview` を新設した。
+Nuxt は従来どおり動いたまま。切り替えは Phase 2。
 
-- 既存8エンドポイントを移植し、**`GET /pp/preview` を新設**する。
-  iOS が計算しない (決定#2) ので、フォームの PP プレビューにサーバ側の口が要る。
-- `@hono/zod-validator` に `@ana/core/schema` のスキーマをそのまま渡す。
-- 認証ミドルウェア (`server/utils/auth.ts` の置き換え):
+| 変更              | 内容                                                                                                                                                                                                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /pp/preview` | 片道PPの内訳を返す。iOS は PP を自分で計算しない (決定#2) ので、記録前のプレビューにサーバ側の口が要る。**認証を掛けていない** — 返すのは公開運賃表の計算結果だけでユーザーデータを含まず、認証を挟むと入力1文字ごとに Supabase への往復が増えるため |
+| エラー形状        | `{ error: { message, issues? } }` に固定した。Nuxt 時代は `createError()` の戻りが Nitro の形式でそのまま出ていて、レスポンスの形がフレームワーク任せだった                                                                                          |
+| 認証              | `src/middleware/auth.ts`。リクエストごとにユーザーの JWT を載せた Supabase クライアントを作るので **RLS が効いたまま**。各クエリの `.eq("user_id", ...)` も Nuxt 版と同じく残してある                                                                |
+| CSV 取り込み      | h3 の `readMultipartFormData()` + Node の `Buffer` を、標準の `FormData` / `File` に置き換えた。Workers 非互換はここ1箇所だけだった (事前の grep どおり)                                                                                             |
+| `flightRow.ts`    | `server/utils/` から `packages/core/` へ移した。Nuxt と Hono の両方が使うため。付随するテスト2本も core へ                                                                                                                                           |
+| クエリ解釈        | `intQuery()` を追加。Nuxt 版は `?year=abc` が `NaN-01-01` という日付文字列になり、エラーにならず黙って0件を返していた                                                                                                                                |
+| テスト            | `app.request()` でハンドラ単位のテスト36本。Nuxt server routes では書けなかった層                                                                                                                                                                    |
+| CI                | `wrangler deploy --dry-run` を追加。Node 専用 API を持ち込むとここで落ちる                                                                                                                                                                           |
 
-  ```ts
-  const supabase = createClient<Database>(c.env.SUPABASE_URL, c.env.SUPABASE_PUBLISHABLE_KEY, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-    auth: { persistSession: false },
-  });
-  ```
+Worker のバンドルは gzip 258KB (大半は supabase-js)。Workers の上限には余裕がある。
 
-  リクエストごとにユーザーの JWT を載せたクライアントを作る → **RLS が効いたまま**。
-  PR #20 で確立した性質を壊さない。
-
-- **エラー形状を固定する**。今は `createError` 任せで Nuxt の形に依存している。
-  クライアントが2つになる以上、`{ error: { message, issues? } }` と決め打ちにする。
-- `app.request()` でハンドラ単位のテストを足す。Nuxt server routes より書きやすく、ここは純粋な利得。
-
-Nuxt は従来どおり動いたまま。切り替えはまだしない。
+環境変数は `apps/api/.dev.vars.example` を参照。
+ローカルは `.dev.vars`、本番は `wrangler secret put` で渡す。
+Service Role キーは置かない (RLS をバイパスするため)。
 
 ### Phase 2 — Web を乗せ替える
 

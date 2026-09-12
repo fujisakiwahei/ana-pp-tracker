@@ -495,6 +495,11 @@ ana-pp-tracker/
 │   └── middleware/
 │       └── auth.global.ts          ← 未ログインなら/loginへ(@nuxtjs/supabaseのredirectOptionsで代替可)
 │
+├── apps/api/                       ← Hono on Cloudflare Workers (移行中。詳細は docs/hono-ios-migration.md)
+│   ├── src/routes/                 ← flights / stats / pp
+│   ├── src/middleware/auth.ts      ← Bearer 検証 + RLS 付き Supabase クライアント
+│   └── wrangler.jsonc
+│
 ├── packages/core/                  ← ドメインロジック(Nuxt非依存のワークスペースパッケージ)
 │   ├── src/
 │   │   ├── routes.ts               ← 3章の路線テーブル
@@ -503,6 +508,7 @@ ana-pp-tracker/
 │   │   ├── pp.ts                   ← PP計算・サジェストロジック
 │   │   ├── ppSummary.ts            ← 年間集計
 │   │   ├── marketFares.ts          ← 市場価格の目安
+│   │   ├── flightRow.ts            ← FlightInput → flights の列
 │   │   └── database.types.ts       ← flights テーブルの行の型
 │   └── test/                       ← 上記のテスト(Nuxt を起動せず実行できる)
 │
@@ -518,7 +524,7 @@ ana-pp-tracker/
 │   │   ├── flights/sample-csv.get.ts ← サンプルCSVのDL
 │   │   └── stats/summary.get.ts    ← 累計PP・残量・サジェスト
 │   └── utils/
-│       └── supabase.ts             ← serverSupabaseClient ラッパ
+│       └── auth.ts                 ← serverSupabaseUser ラッパ
 │
 └── supabase/
     └── migrations/
