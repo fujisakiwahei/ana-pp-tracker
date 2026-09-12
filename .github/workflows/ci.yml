@@ -29,13 +29,11 @@ jobs:
       - name: Test
         run: pnpm test
 
-      # Supabase の環境変数が無くてもビルド自体は通る (実行時にのみ必要)。
-      - name: Build (Nuxt)
+      # 全ワークスペースをビルドする。
+      # Supabase の環境変数が無くても Nuxt のビルドは通る (実行時にのみ必要)。
+      # API 側は wrangler の dry-run なので、Node 専用 API (Buffer など) を
+      # 持ち込むとここで落ちる。
+      - name: Build
         run: pnpm build
-
-      # Worker 向けにバンドルできるか確かめる。
-      # Node 専用 API (Buffer など) を持ち込むとここで落ちる。
-      - name: Build (API Worker)
-        run: pnpm -F @ana/api build
         env:
           WRANGLER_SEND_METRICS: "false"

@@ -23,12 +23,9 @@ Web も残す。策定日: 2026-09-12 / 対象コミット: `ed00195`
 ```
 packages/core/   ドメインロジック (旧 shared/)。Nuxt にも Hono にも依存しない  ✅
 apps/api/        Hono on Cloudflare Workers                                  ✅
-apps/web/        Nuxt 4 (SPA)。apps/api のクライアント        ← 現在リポジトリ直下
+apps/web/        Nuxt 4 (SPA)。apps/api のクライアント                          ✅
 ios/             Xcode / SwiftUI                              ← 未着手
 ```
-
-Nuxt はまだリポジトリ直下にある。`apps/web/` への移動は Phase 2 でまとめて行う
-(先にやると設定ファイルのパスを2度触ることになるため)。
 
 ## フェーズ
 
@@ -67,13 +64,34 @@ Worker のバンドルは gzip 258KB (大半は supabase-js)。Workers の上限
 ローカルは `.dev.vars`、本番は `wrangler secret put` で渡す。
 Service Role キーは置かない (RLS をバイパスするため)。
 
-### Phase 2 — Web を乗せ替える
+### Phase 2 — Web を乗せ替える ✅ 完了
 
-`ssr: false` にし、`server/` を削除、`#supabase/server` の使用をやめる。
-`app/composables/useFlights.ts` が API 呼び出しを1箇所に集約しているので、
-**変更はこのファイルと CORS 設定でほぼ終わる**。
+Nuxt の server routes を削除し、`apps/api` を叩く SPA にした上で、
+Nuxt 本体を `apps/web/` へ移した。
 
-Swift を1行も書く前に、実クライアントで API 契約を検証できる。この順序は守る。
+| 変更                                   | 内容                                                                                                                                                     |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ssr: false`                           | API が別オリジンになり認証も Bearer のみになったので、サーバ側にセッションが無い状態で描く意味がない。ビルド出力は 5.09MB → 1.72MB (gzip 1.19MB → 411kB) |
+| `app/composables/useApi.ts`            | ベースURLと Authorization ヘッダを集約。以前は `"/api/..."` が6ファイルに散っていた                                                                      |
+| `useFetch` → `useAsyncData` + `$fetch` | Authorization ヘッダをリクエストの都度組み立てるため (トークン更新後も正しい値になる)                                                                    |
+| `toErrorMessage`                       | API の新しいエラー形 (`data.error.message`) を読む                                                                                                       |
+| ディレクトリ                           | Nuxt を `apps/web/` へ。`package.json` を分割し、ルートは各ワークスペースへ委譲するだけにした                                                            |
+
+**PP 計算は Web からは `@ana/core/pp` を直接呼ぶ。** `/pp/preview` は Swift から
+同じ計算を使うための口で、同じ TS を使える Web が往復する理由はない。
+どちらも定義元は `packages/core` の1箇所なので二重実装にはならない。
+
+移動でハマった点: `@nuxt/eslint-config` は TS 機能の有無を
+`isPackageExists("typescript")` で判定する。`typescript` をルートから `apps/web` へ
+移した瞬間に false へ倒れ、生成される設定から `@typescript-eslint` プラグインごと
+消えた (ルートの設定がそのルールを参照しているので即エラー)。
+`nuxt.config.ts` の `eslint.config.typescript: true` で明示してある。
+
+もう1点、Nuxt が生成する設定には `app/pages/**` のようにプロジェクト相対の
+`files` を持つオブジェクトがある。ESLint はこれを設定ファイルの位置
+(= リポジトリルート) 基準で解決するため、移動後は一切マッチしなくなり、
+ページやレイアウトに対する `vue/multi-word-component-names` の緩和が外れた。
+ルートの `eslint.config.mjs` で該当オブジェクトにだけ `basePath` を与えている。
 
 ### Phase 3 — iOS
 

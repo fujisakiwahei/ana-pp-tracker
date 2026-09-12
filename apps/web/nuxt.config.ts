@@ -51,5 +51,16 @@ export default defineNuxtConfig({
     autoImports: true,
   },
 
+  eslint: {
+    config: {
+      // @nuxt/eslint-config は typescript の有無を isPackageExists("typescript") で
+      // 判定する。monorepo にしてルート直下に typescript が居なくなると false に倒れ、
+      // 生成される設定から @typescript-eslint プラグインごと消える
+      // (ルートの eslint.config.mjs がそのルールを参照しているので即エラーになる)。
+      // パッケージ解決の副作用に依存させず明示する。
+      typescript: true,
+    },
+  },
+
   css: ["~/assets/styles/main.scss"],
 });
