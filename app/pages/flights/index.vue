@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { AirportCode, CabinClass } from "~~/shared/routes";
-import type { FlightRow, FlightStatus } from "~~/shared/schema";
-import { getCurrentYear } from "~~/shared/pp";
+import type { AirportCode, CabinClass } from "@ana/core/routes";
+import type { FlightRow, FlightStatus } from "@ana/core/schema";
+import { getCurrentYear } from "@ana/core/pp";
 
 const currentYear = getCurrentYear();
 const year = ref(currentYear);

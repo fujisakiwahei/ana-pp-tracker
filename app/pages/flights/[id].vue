@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FlightCreateInput, FlightInput, FlightRow } from "~~/shared/schema";
+import type { FlightCreateInput, FlightInput, FlightRow } from "@ana/core/schema";
 
 const route = useRoute();
 const id = String(route.params.id);

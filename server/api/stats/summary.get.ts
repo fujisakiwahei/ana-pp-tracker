@@ -1,8 +1,8 @@
 import { serverSupabaseClient } from "#supabase/server";
-import type { Database } from "~~/shared/database.types";
+import type { Database } from "@ana/core/database.types";
 import { requireUser } from "~~/server/utils/auth";
-import { getCurrentYear, todayISO } from "~~/shared/pp";
-import { summarizeYearFlights } from "~~/shared/ppSummary";
+import { getCurrentYear, todayISO } from "@ana/core/pp";
+import { summarizeYearFlights } from "@ana/core/ppSummary";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);

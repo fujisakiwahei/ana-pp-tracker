@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AirportCode } from "~~/shared/routes";
+import type { AirportCode } from "@ana/core/routes";
 
 const props = defineProps<{
   from: AirportCode;

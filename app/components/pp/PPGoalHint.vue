@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Suggestion } from "~~/shared/pp";
-import { AIRPORTS } from "~~/shared/airports";
+import type { Suggestion } from "@ana/core/pp";
+import { AIRPORTS } from "@ana/core/airports";
 
 const props = defineProps<{ suggestion: Suggestion }>();
 </script>

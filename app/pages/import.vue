@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PreviewRow } from "~/components/import/CsvPreviewTable.vue";
-import { csvFlightInputSchema } from "~~/shared/schema";
-import { resolvePP } from "~~/shared/pp";
+import { csvFlightInputSchema } from "@ana/core/schema";
+import { resolvePP } from "@ana/core/pp";
 
 const { parseFile } = useCsv();
 const { importCsv } = useFlights();

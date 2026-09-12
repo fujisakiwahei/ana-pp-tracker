@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { FlightStatus } from "~~/shared/schema";
-import { todayISO } from "~~/shared/pp";
+import type { FlightStatus } from "@ana/core/schema";
+import { todayISO } from "@ana/core/pp";
 
 const props = defineProps<{ status: FlightStatus; flownAt: string }>();
 

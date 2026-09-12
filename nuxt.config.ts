@@ -38,10 +38,6 @@ export default defineNuxtConfig({
     autoImports: true,
   },
 
-  imports: {
-    dirs: ["shared"],
-  },
-
   css: ["~/assets/styles/main.scss"],
 
 });

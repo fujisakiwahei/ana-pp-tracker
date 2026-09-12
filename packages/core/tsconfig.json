@@ -1,0 +1,21 @@
+{
+  // core は Nuxt に依存しない素の TypeScript。
+  // 以前は test/tsconfig.json が .nuxt/tsconfig.shared.json を継承していて、
+  // ドメインロジックの型チェックに Nuxt のビルド成果物が必要だった。
+  // apps/api (Hono) からも同じコードを使うため、その依存を断ってある。
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": []
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

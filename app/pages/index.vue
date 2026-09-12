@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { getCurrentYear, getSuggestions } from "~~/shared/pp";
-import { CABIN_OPTIONS, type CabinClass } from "~~/shared/routes";
-import type { FlightRow } from "~~/shared/schema";
+import { getCurrentYear, getSuggestions } from "@ana/core/pp";
+import { CABIN_OPTIONS, type CabinClass } from "@ana/core/routes";
+import type { FlightRow } from "@ana/core/schema";
 
 const user = useSupabaseUser();
 const year = ref(getCurrentYear());

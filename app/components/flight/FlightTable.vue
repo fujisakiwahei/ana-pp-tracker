@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { FlightRow } from "~~/shared/schema";
-import { AIRPORTS } from "~~/shared/airports";
+import type { FlightRow } from "@ana/core/schema";
+import { AIRPORTS } from "@ana/core/airports";
 
 defineProps<{ flights: FlightRow[]; compact?: boolean }>();
 </script>

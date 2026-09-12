@@ -2,9 +2,17 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    // shared/ は Nuxt のエイリアスを使わない素の TS なので、
-    // Nuxt ランタイムを立ち上げずに node 環境で直接テストできる。
-    environment: "node",
-    include: ["test/**/*.spec.ts"],
+    // ドメインロジックは packages/core が自分のテストを持つ。
+    // ここに残るのは Nuxt 側 (server/utils, app/utils) のテストだけ。
+    projects: [
+      {
+        test: {
+          name: "web",
+          environment: "node",
+          include: ["test/**/*.spec.ts"],
+        },
+      },
+      "packages/*",
+    ],
   },
 });

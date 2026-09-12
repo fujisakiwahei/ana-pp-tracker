@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { toTypedSchema } from "@vee-validate/zod";
 import FlightReturnPanel from "./FlightReturnPanel.vue";
-import { flightInputSchema, type FlightCreateInput, type FlightInput } from "~~/shared/schema";
-import type { AirportCode, CabinClass, FareType } from "~~/shared/routes";
-import { todayISO } from "~~/shared/pp";
+import { flightInputSchema, type FlightCreateInput, type FlightInput } from "@ana/core/schema";
+import type { AirportCode, CabinClass, FareType } from "@ana/core/routes";
+import { todayISO } from "@ana/core/pp";
 import { resolvePPTotals } from "~~/app/utils/ppTotals";
 
 const props = defineProps<{

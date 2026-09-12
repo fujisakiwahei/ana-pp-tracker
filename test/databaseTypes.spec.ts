@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { asFlightRow, asFlightRows, type FlightDbRow, type FlightRow } from "../shared/database.types";
+import { asFlightRow, asFlightRows, type FlightDbRow, type FlightRow } from "@ana/core/database.types";
 import { toFlightInsertRow } from "../server/utils/flightRow";
-import { flightInputSchema } from "../shared/schema";
+import { flightInputSchema } from "@ana/core/schema";
 
 const dbRow: FlightDbRow = {
   id: "11111111-1111-1111-1111-111111111111",

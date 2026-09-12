@@ -11,13 +11,14 @@
     "postinstall": "nuxt prepare",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "nuxt typecheck && tsc -p test/tsconfig.json --noEmit",
+    "typecheck": "nuxt typecheck && tsc -p test/tsconfig.json --noEmit && pnpm -F @ana/core typecheck",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@ana/core": "workspace:*",
     "@nuxtjs/supabase": "^2.0.8",
     "@vee-validate/nuxt": "^4.15.1",
     "@vee-validate/zod": "^4.15.1",

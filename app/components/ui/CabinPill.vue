@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CabinClass } from "~~/shared/routes";
+import type { CabinClass } from "@ana/core/routes";
 
 defineProps<{ cabin: CabinClass }>();
 </script>

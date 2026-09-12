@@ -4,9 +4,9 @@ import {
   HUB_AIRPORT_CODES,
   type AirportCode,
   type CabinClass,
-} from "~~/shared/routes";
-import { AIRPORTS } from "~~/shared/airports";
-import type { FlightStatus } from "~~/shared/schema";
+} from "@ana/core/routes";
+import { AIRPORTS } from "@ana/core/airports";
+import type { FlightStatus } from "@ana/core/schema";
 
 const props = defineProps<{
   year: number;

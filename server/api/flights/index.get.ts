@@ -1,7 +1,7 @@
 import { serverSupabaseClient } from "#supabase/server";
-import { asFlightRows, type Database } from "~~/shared/database.types";
+import { asFlightRows, type Database } from "@ana/core/database.types";
 import { requireUser } from "~~/server/utils/auth";
-import { getCurrentYear } from "~~/shared/pp";
+import { getCurrentYear } from "@ana/core/pp";
 
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event);

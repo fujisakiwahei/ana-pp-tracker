@@ -1,5 +1,5 @@
 import { serverSupabaseClient } from "#supabase/server";
-import type { Database } from "~~/shared/database.types";
+import type { Database } from "@ana/core/database.types";
 import { requireUser } from "~~/server/utils/auth";
 
 export default defineEventHandler(async (event) => {

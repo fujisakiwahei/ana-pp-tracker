@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@ana/core':
+        specifier: workspace:*
+        version: link:packages/core
       '@nuxtjs/supabase':
         specifier: ^2.0.8
         version: 2.0.8
@@ -60,6 +63,19 @@ importers:
       vue-tsc:
         specifier: ^3.3.9
         version: 3.3.9(typescript@5.9.3)
+
+  packages/core:
+    dependencies:
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.7
+        version: 3.2.7(@types/node@25.7.0)(jiti@2.7.0)(sass@1.99.0)(terser@5.47.1)(yaml@2.9.0)
 
 packages:
 

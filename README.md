@@ -107,7 +107,7 @@ SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 SUPABASE_KEY=eyJhbGci...
 ```
 
-### 0-6. このREADMEとshared定数ファイルを先に作っておく
+### 0-6. このREADMEとドメイン定数ファイルを先に作っておく
 
 機内では「決め」のドキュメントが手元にあると詰まらない。
 
@@ -375,7 +375,7 @@ PP(ファースト) = round(区間基本マイレージ × 1.20 × 2) + 400
 
 ### 3-5. ハードコード用JSONフォーマット
 
-`shared/routes.ts` で以下の形で持つ想定。
+`packages/core/src/routes.ts` で以下の形で持つ想定。
 
 ```ts
 export type CabinClass = 'economy' | 'first'
@@ -495,10 +495,16 @@ ana-pp-tracker/
 │   └── middleware/
 │       └── auth.global.ts          ← 未ログインなら/loginへ(@nuxtjs/supabaseのredirectOptionsで代替可)
 │
-├── shared/                         ← フロント・サーバ共有(Nuxt4の標準ディレクトリ)
-│   ├── routes.ts                   ← 3章の路線テーブル
-│   ├── schema.ts                   ← Zodスキーマ(FlightInput等)
-│   └── pp.ts                       ← PP集計・サジェストロジック
+├── packages/core/                  ← ドメインロジック(Nuxt非依存のワークスペースパッケージ)
+│   ├── src/
+│   │   ├── routes.ts               ← 3章の路線テーブル
+│   │   ├── airports.ts             ← 空港マスタ
+│   │   ├── schema.ts               ← Zodスキーマ(FlightInput等)
+│   │   ├── pp.ts                   ← PP計算・サジェストロジック
+│   │   ├── ppSummary.ts            ← 年間集計
+│   │   ├── marketFares.ts          ← 市場価格の目安
+│   │   └── database.types.ts       ← flights テーブルの行の型
+│   └── test/                       ← 上記のテスト(Nuxt を起動せず実行できる)
 │
 ├── server/
 │   ├── api/
@@ -521,8 +527,9 @@ ana-pp-tracker/
 
 ### 設計メモ
 
-- **共通データは `shared/` に置く**。ハードコードした路線ごとのPPテーブルのように、フロントからもサーバからも参照したいデータは `shared/` に入れると両方から `import` できる（Nuxt 4 の標準ディレクトリ）。
-- **`ROUTES` のような全大文字は「変更されない定数」を表す慣習**。`shared/` 配下のマスタデータはこの命名で統一している。
+- **ドメインロジックは `packages/core/` に置く**。路線テーブル・PP計算・Zodスキーマのように、フロントからもサーバからも参照するものはここに集約し、`@ana/core/routes` のようなサブパスで import する。Nuxt にもh3にも依存しないので、Nuxt を起動せずに型チェックとテストができる。
+- **`ROUTES` のような全大文字は「変更されない定数」を表す慣習**。`packages/core/` 配下のマスタデータはこの命名で統一している。
+- 以前は Nuxt 標準の `shared/` ディレクトリに置いていた。バックエンドを Hono に移す前段として、Nuxt から切り離した独立パッケージにしてある。経緯と移行計画は [docs/hono-ios-migration.md](docs/hono-ios-migration.md)。
 
 ### リポジトリ直下のその他のディレクトリ
 
@@ -554,10 +561,6 @@ export default defineNuxtConfig({
 
   veeValidate: {
     autoImports: true,
-  },
-
-  imports: {
-    dirs: ['shared'],
   },
 
   css: ['~/assets/styles/main.scss'],
@@ -675,7 +678,7 @@ throw createError({ statusCode: 400, statusMessage: 'Validation failed', data: {
 リクエスト Body: `flightInputSchema` (Zod, 後述)
 サーバ側で:
 1. Zodで検証
-2. `pp` が未指定なら `shared/routes.ts` のテーブルから自動算出してセット
+2. `pp` が未指定なら `packages/core/src/routes.ts` のテーブルから自動算出してセット
 3. `user_id` は `auth.uid()` から
 4. insertしたレコードを返す
 
@@ -728,7 +731,7 @@ flown_at,flight_number,from_airport,to_airport,cabin,fare_type,pp,aircraft,seat,
 
 `suggestions` は福岡・那覇・羽田起点の主要路線について「あと何往復で50,000に届くか」を返す。
 
-### Zodスキーマ(`shared/schema.ts` 抜粋)
+### Zodスキーマ(`packages/core/src/schema.ts` 抜粋)
 
 ```ts
 import { z } from 'zod'
@@ -957,11 +960,11 @@ assets/styles/
 3. `app/assets/styles/` の SCSSファイル4つを作成
 4. `app/layouts/default.vue` `app/layouts/auth.vue` のシェルを作成
 
-### Step 2: shared定数(15分)
+### Step 2: ドメイン定数(15分)
 
-1. `shared/routes.ts` に 3章の路線テーブルを全部書き出す
-2. `shared/schema.ts` にZodスキーマ
-3. `shared/pp.ts` に `calcPP()`, `roundTripsNeeded()`, `getSuggestions()` を実装
+1. `packages/core/src/routes.ts` に 3章の路線テーブルを全部書き出す
+2. `packages/core/src/schema.ts` にZodスキーマ
+3. `packages/core/src/pp.ts` に `calcPP()`, `roundTripsNeeded()`, `getSuggestions()` を実装
 
 ### Step 3: 認証(10分・Supabase設定済み前提)
 

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { FlightInput } from "~~/shared/schema";
+import type { FlightInput } from "@ana/core/schema";
 import {
   CABIN_OPTIONS,
   FARE_TYPES,
   FARE_TYPE_LABELS,
   SELECTABLE_AIRPORT_CODES,
-} from "~~/shared/routes";
-import { AIRPORTS } from "~~/shared/airports";
+} from "@ana/core/routes";
+import { AIRPORTS } from "@ana/core/airports";
 
 // 親 (FlightForm.vue) の useForm コンテキストにぶら下がる。
 // 往路の入力欄はすべて親の1フォーム = flightInputSchema で検証される。
@@ -27,7 +27,7 @@ const [ratingAircraft] = defineField("rating_aircraft");
 const [ratingLounge] = defineField("rating_lounge");
 const [notes, notesAttrs] = defineField("notes");
 
-// 運賃の一覧・表示名は shared/routes.ts が定義元。運賃を増やしても勝手に追従する。
+// 運賃の一覧・表示名は @ana/core/routes が定義元。運賃を増やしても勝手に追従する。
 const FARE_OPTIONS = FARE_TYPES.map((value) => ({ value, label: FARE_TYPE_LABELS[value] }));
 </script>
 

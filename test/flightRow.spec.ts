@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { csvFlightInputSchema, flightInputSchema, type FlightInput } from "../shared/schema";
-import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "../shared/pp";
+import { csvFlightInputSchema, flightInputSchema, type FlightInput } from "@ana/core/schema";
+import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "@ana/core/pp";
 import { toFlightColumns, toFlightInsertRow } from "../server/utils/flightRow";
 
 const base = {

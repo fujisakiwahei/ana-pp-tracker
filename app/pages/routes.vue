@@ -8,15 +8,15 @@ import {
   type CabinClass,
   type FareType,
   type Route,
-} from "~~/shared/routes";
-import { AIRPORTS } from "~~/shared/airports";
-import { FARE_CHANGE_DATE } from "~~/shared/pp";
+} from "@ana/core/routes";
+import { AIRPORTS } from "@ana/core/airports";
+import { FARE_CHANGE_DATE } from "@ana/core/pp";
 
 const hub = ref<AirportCode>("HND");
 const cabin = ref<CabinClass>("economy");
 const fareType = ref<FareType>("simple");
 
-// 路線一覧では代表的な3運賃だけ出す。表示名は shared/routes.ts と共有する。
+// 路線一覧では代表的な3運賃だけ出す。表示名は @ana/core/routes と共有する。
 const FARE_OPTIONS: Array<{ value: FareType; label: string }> = (
   ["simple", "standard", "flex"] as const
 ).map((value) => ({ value, label: FARE_TYPE_LABELS[value] }));

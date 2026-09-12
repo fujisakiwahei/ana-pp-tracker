@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { CabinClass, Route, AirportCode, FareType } from "~~/shared/routes";
-import { AIRPORTS } from "~~/shared/airports";
-import { ANA_RESERVATION_URL, calcPP, todayISO } from "~~/shared/pp";
-import { lookupMarket, yenPerPP } from "~~/shared/marketFares";
+import type { CabinClass, Route, AirportCode, FareType } from "@ana/core/routes";
+import { AIRPORTS } from "@ana/core/airports";
+import { ANA_RESERVATION_URL, calcPP, todayISO } from "@ana/core/pp";
+import { lookupMarket, yenPerPP } from "@ana/core/marketFares";
 
 const props = withDefaults(
   defineProps<{

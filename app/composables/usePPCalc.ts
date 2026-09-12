@@ -1,5 +1,5 @@
-import type { AirportCode, CabinClass, FareType } from "~~/shared/routes";
-import { calcPPBreakdown, findRoute, isNewFareEra } from "~~/shared/pp";
+import type { AirportCode, CabinClass, FareType } from "@ana/core/routes";
+import { calcPPBreakdown, findRoute, isNewFareEra } from "@ana/core/pp";
 
 export function usePPCalc(
   from: MaybeRefOrGetter<AirportCode | undefined>,

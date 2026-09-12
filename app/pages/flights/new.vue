@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FlightCreateInput } from "~~/shared/schema";
+import type { FlightCreateInput } from "@ana/core/schema";
 
 const { create } = useFlights();
 const busy = ref(false);

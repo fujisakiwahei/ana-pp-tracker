@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { FlightInput } from "~~/shared/schema";
-import type { PPBreakdown } from "~~/shared/pp";
-import { DOMESTIC_ROUTE_MULTIPLIER, GOAL_PP } from "~~/shared/pp";
+import type { FlightInput } from "@ana/core/schema";
+import type { PPBreakdown } from "@ana/core/pp";
+import { DOMESTIC_ROUTE_MULTIPLIER, GOAL_PP } from "@ana/core/pp";
 import type { FlightPPTotals } from "~~/app/utils/ppTotals";
 
 const props = defineProps<{

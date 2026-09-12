@@ -1,4 +1,4 @@
-import type { FlightCreateInput, FlightInput, FlightRow } from "~~/shared/schema";
+import type { FlightCreateInput, FlightInput, FlightRow } from "@ana/core/schema";
 
 export function useFlights() {
   const list = (params: { year?: number; limit?: number; offset?: number } = {}) =>

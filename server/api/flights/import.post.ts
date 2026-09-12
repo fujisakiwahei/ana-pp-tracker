@@ -1,10 +1,10 @@
 import Papa from "papaparse";
 import { serverSupabaseClient } from "#supabase/server";
-import type { Database } from "~~/shared/database.types";
+import type { Database } from "@ana/core/database.types";
 import { requireUser } from "~~/server/utils/auth";
 import { toFlightInsertRow, type FlightInsertRow } from "~~/server/utils/flightRow";
-import { csvFlightInputSchema } from "~~/shared/schema";
-import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "~~/shared/pp";
+import { csvFlightInputSchema } from "@ana/core/schema";
+import { PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "@ana/core/pp";
 
 interface RowError {
   row: number;

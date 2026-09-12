@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toTypedSchema } from "@vee-validate/zod";
-import { returnFlightInputSchema, type ReturnFlightInput } from "~~/shared/schema";
-import { CABIN_OPTIONS, type AirportCode, type CabinClass, type FareType } from "~~/shared/routes";
+import { returnFlightInputSchema, type ReturnFlightInput } from "@ana/core/schema";
+import { CABIN_OPTIONS, type AirportCode, type CabinClass, type FareType } from "@ana/core/routes";
 
 const props = defineProps<{
   /** 往路の出発地 (復路では到着地になる) */
