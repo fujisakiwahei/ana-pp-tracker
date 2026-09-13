@@ -1,0 +1,117 @@
+<script setup lang="ts">
+import type { AirportCode, CabinClass } from "@ana/core/routes";
+import type { FlightStatus } from "@ana/core/schema";
+import { getCurrentYear } from "@ana/core/pp";
+
+const currentYear = getCurrentYear();
+const year = ref(currentYear);
+const cabin = ref<CabinClass | "all">("all");
+const hub = ref<AirportCode | "all">("all");
+const status = ref<FlightStatus | "all">("all");
+
+const yearOptions = computed(() => {
+  const years: number[] = [];
+  for (let y = currentYear; y >= currentYear - 4; y--) years.push(y);
+  return years;
+});
+
+const { list } = useFlights();
+const { data } = await useAsyncData("flights-list", () => list({ year: year.value, limit: 500 }), {
+  watch: [year],
+});
+
+const filtered = computed(() => {
+  const items = data.value?.items ?? [];
+  return items.filter((f) => {
+    if (cabin.value !== "all" && f.cabin !== cabin.value) return false;
+    if (status.value !== "all" && f.status !== status.value) return false;
+    if (hub.value !== "all") {
+      if (f.from_airport !== hub.value && f.to_airport !== hub.value) return false;
+    }
+    return true;
+  });
+});
+
+const confirmedPP = computed(() =>
+  filtered.value.filter((f) => f.status !== "tentative").reduce((s, f) => s + f.pp, 0)
+);
+const tentativePP = computed(() =>
+  filtered.value.filter((f) => f.status === "tentative").reduce((s, f) => s + f.pp, 0)
+);
+</script>
+
+<template>
+  <PageHeader :eyebrow="`${year}年の記録`" title="搭乗履歴">
+    <template #actions>
+      <div class="controls">
+        <FlightFilters
+          :year="year"
+          :cabin="cabin"
+          :hub="hub"
+          :status="status"
+          :year-options="yearOptions"
+          @update:year="year = $event"
+          @update:cabin="cabin = $event"
+          @update:hub="hub = $event"
+          @update:status="status = $event"
+        />
+        <NuxtLink to="/flights/new" class="btn">+ 新規登録</NuxtLink>
+      </div>
+    </template>
+  </PageHeader>
+
+  <div class="page-body">
+    <div class="meta">
+      <span class="meta-jp meta-summary">
+        <span class="num">{{ filtered.length }}</span
+        >件 · 確定 <span class="num">{{ confirmedPP.toLocaleString() }}</span> PP
+        <template v-if="tentativePP > 0">
+          ＋ 未予約 <span class="num">{{ tentativePP.toLocaleString() }}</span> PP
+        </template>
+      </span>
+      <span class="meta-jp">搭乗日の新しい順</span>
+    </div>
+    <hr class="divider-thick" />
+    <FlightTable :flights="filtered" />
+    <p v-if="filtered.length === 0" class="empty">
+      条件に合うフライトがありません。フィルターを変更するか、新しいフライトを登録してください。
+    </p>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.controls {
+  display: flex;
+  gap: 16px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.meta-jp {
+  font-size: 12px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+}
+.meta-summary {
+  font-size: 16px;
+  color: var(--ink);
+}
+.meta-summary .num {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.empty {
+  margin-top: 24px;
+  font-size: 12.5px;
+  color: var(--ink-mute);
+  line-height: 1.7;
+}
+</style>

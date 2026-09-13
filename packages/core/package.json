@@ -1,0 +1,27 @@
+{
+  "name": "@ana/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./airports": "./src/airports.ts",
+    "./database.types": "./src/database.types.ts",
+    "./flightRow": "./src/flightRow.ts",
+    "./marketFares": "./src/marketFares.ts",
+    "./pp": "./src/pp.ts",
+    "./ppSummary": "./src/ppSummary.ts",
+    "./routes": "./src/routes.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

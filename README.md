@@ -26,6 +26,11 @@ ANA国内線のプレミアムポイント(PP)を記録し、福岡・那覇・�
 
 ## 0. 機内に乗る前のセットアップ手順
 
+> この章と11章は、単一の Nuxt プロジェクトとして作り始めたときの手順。
+> 現在は pnpm ワークスペースに分かれている (5章)。新規セットアップは
+> `pnpm install` のあと、`apps/web/.env` と `apps/api/.dev.vars` を用意して
+> `pnpm dev` / `pnpm dev:api` を叩く。
+
 **機内Wi-Fiがなくても動くように、すべての依存と参照ドキュメントをローカルに揃えておく**。以下を **離陸前に必ず** 済ませる。
 
 ### 0-1. ランタイム前提
@@ -99,15 +104,15 @@ pnpm dev
    - Site URL: `http://localhost:3000`
    - Redirect URLs に `http://localhost:3000/confirm` を追加(メール確認リンクが踏まれた時の戻り先)
 5. **SQL Editor** で本READMEの [6. データベース設計](#6-データベース設計supabase) のマイグレーションSQLを実行
-6. `.env.local` にキーを書く
+6. `apps/web/.env` にキーを書く
 
 ```bash
-# ana-pp-tracker/.env.local
+# apps/web/.env
 SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 SUPABASE_KEY=eyJhbGci...
 ```
 
-### 0-6. このREADMEとshared定数ファイルを先に作っておく
+### 0-6. このREADMEとドメイン定数ファイルを先に作っておく
 
 機内では「決め」のドキュメントが手元にあると詰まらない。
 
@@ -121,7 +126,7 @@ cp <このREADME> docs/README.md   # またはこのファイル自体をリポ�
 - [ ] `node -v` が 20.x 以上
 - [ ] `pnpm install` がオフラインでも通る(`pnpm install --offline` で確認)
 - [ ] `pnpm dev` が起動する
-- [ ] `.env.local` に SUPABASE_URL / SUPABASE_KEY を記入済み
+- [ ] `apps/web/.env` に SUPABASE_URL / SUPABASE_KEY を記入済み
 - [ ] Supabase に flights テーブル作成済み・RLSポリシー適用済み
 - [ ] Email/Password プロバイダ有効化済み(MVPはこれだけでOK。Google OAuthはスコープ外)
 - [ ] このREADMEがリポジトリにコミット済み
@@ -141,26 +146,26 @@ ANA国内線の搭乗を記録し、当年のPP累計を追跡。福岡・那覇
 
 ### コア要件
 
-| # | 要件 | 備考 |
-|---|---|---|
-| F-01 | 現在のPP累計を表示 | 当年(1/1〜12/31)集計 |
-| F-02 | 50,000 PP(プラチナ条件)までの残量を可視化 | プログレスバー + 残PP |
-| F-03 | 「どの路線ならあと何往復」のサジェスト | 拠点(FUK/OKA/HND)別 |
-| F-04 | 路線一覧(福岡・那覇・羽田起点)とPP表 | エコノミー / ファーストの切替 |
-| F-05 | フライト登録(フォーム) | API経由 |
-| F-06 | CSVバルクインポート | サンプルCSVのDL機能つき |
-| F-07 | 機体・座席・ラウンジのレビュー(★1〜5 + 自由記述) | 振り返って楽しむ用 |
-| F-08 | ANA予約サイトへの導線 | 路線カードから新規予約画面へ |
-| F-09 | Email + パスワード認証 | Supabase Auth(MVPはこれのみ。Google OAuthは後回し) |
-| F-10 | レスポンシブ(PC / SP) | モバイルファースト寄り |
+| #    | 要件                                             | 備考                                               |
+| ---- | ------------------------------------------------ | -------------------------------------------------- |
+| F-01 | 現在のPP累計を表示                               | 当年(1/1〜12/31)集計                               |
+| F-02 | 50,000 PP(プラチナ条件)までの残量を可視化        | プログレスバー + 残PP                              |
+| F-03 | 「どの路線ならあと何往復」のサジェスト           | 拠点(FUK/OKA/HND)別                                |
+| F-04 | 路線一覧(福岡・那覇・羽田起点)とPP表             | エコノミー / ファーストの切替                      |
+| F-05 | フライト登録(フォーム)                           | API経由                                            |
+| F-06 | CSVバルクインポート                              | サンプルCSVのDL機能つき                            |
+| F-07 | 機体・座席・ラウンジのレビュー(★1〜5 + 自由記述) | 振り返って楽しむ用                                 |
+| F-08 | ANA予約サイトへの導線                            | 路線カードから新規予約画面へ                       |
+| F-09 | Email + パスワード認証                           | Supabase Auth(MVPはこれのみ。Google OAuthは後回し) |
+| F-10 | レスポンシブ(PC / SP)                            | モバイルファースト寄り                             |
 
 ### ステイタス目標(PPベース)
 
-| ステイタス | 年間PP | うちANAグループ運航便分 |
-|---|---|---|
-| ブロンズ | 30,000 | 15,000 |
-| プラチナ | **50,000** | 25,000 |
-| ダイヤモンド | 100,000 | 50,000 |
+| ステイタス   | 年間PP     | うちANAグループ運航便分 |
+| ------------ | ---------- | ----------------------- |
+| ブロンズ     | 30,000     | 15,000                  |
+| プラチナ     | **50,000** | 25,000                  |
+| ダイヤモンド | 100,000    | 50,000                  |
 
 本アプリのデフォルト目標は **プラチナ(50,000 PP)**。MVPでは50,000固定。
 
@@ -199,17 +204,17 @@ PP = 区間基本マイレージ
 
 座席クラス表記は2024年4月以降「ファーストクラス(旧プレミアムクラス) / エコノミークラス(旧普通席)」。
 
-| 座席クラス | 対象運賃 | 積算率 |
-|---|---|---|
-| ファーストクラス | フレックス / Biz / ANAカード優待割引 / フレックス(国際線接続専用) | **150%** |
-| ファーストクラス | スタンダード / 株主優待割引 | **130%** |
-| ファーストクラス | シンプル | **120%** |
-| ファーストクラス | セール | **100%** |
+| 座席クラス       | 対象運賃                                                                     | 積算率   |
+| ---------------- | ---------------------------------------------------------------------------- | -------- |
+| ファーストクラス | フレックス / Biz / ANAカード優待割引 / フレックス(国際線接続専用)            | **150%** |
+| ファーストクラス | スタンダード / 株主優待割引                                                  | **130%** |
+| ファーストクラス | シンプル                                                                     | **120%** |
+| ファーストクラス | セール                                                                       | **100%** |
 | エコノミークラス | フレックス / Biz / ANAカード優待割引 / 島民割引 / フレックス(国際線接続専用) | **100%** |
-| エコノミークラス | 株主優待割引 / スタンダード | **80%** |
-| エコノミークラス | シンプル | **70%** |
-| エコノミークラス | セール / 個人包括旅行運賃(APIT) / ユース / シニア / 包括団体旅行運賃(IITA) | **50%** |
-| エコノミークラス | 包括旅行割引運賃(ITE) | **30%** |
+| エコノミークラス | 株主優待割引 / スタンダード                                                  | **80%**  |
+| エコノミークラス | シンプル                                                                     | **70%**  |
+| エコノミークラス | セール / 個人包括旅行運賃(APIT) / ユース / シニア / 包括団体旅行運賃(IITA)   | **50%**  |
+| エコノミークラス | 包括旅行割引運賃(ITE)                                                        | **30%**  |
 
 #### プレミアムクラス(=ファーストクラス)アップグレード時
 
@@ -218,24 +223,24 @@ PP = 区間基本マイレージ
 
 ### 路線倍率
 
-| 路線 | 倍率 |
-|---|---|
-| 国内線 | **×2** |
-| 国際線(日本発着 アジア/オセアニア/ウラジオストク) | ×1.5 |
-| 国際線(その他・スターアライアンス便) | ×1 |
+| 路線                                              | 倍率   |
+| ------------------------------------------------- | ------ |
+| 国内線                                            | **×2** |
+| 国際線(日本発着 アジア/オセアニア/ウラジオストク) | ×1.5   |
+| 国際線(その他・スターアライアンス便)              | ×1     |
 
 本アプリは国内線のみ → **常に ×2** 固定。
 
 ### 搭乗ポイント(国内線・新体系)
 
-| 座席クラス | 対象運賃 | 搭乗ポイント(片道) |
-|---|---|---|
-| ファーストクラス | フレックス / Biz / ANAカード優待割引 / 株主優待割引 / スタンダード / シンプル | **400 pt** |
-| エコノミークラス | フレックス / Biz / ANAカード優待割引 / 株主優待割引 | **400 pt** |
-| エコノミークラス | スタンダード | **200 pt** |
-| エコノミークラス | シンプル | **100 pt** |
-| ファーストクラス | セール / フレックス(国際線接続専用) | **0 pt** |
-| エコノミークラス | 島民割引 / セール / ユース / シニア / 各種包括旅行運賃 | **0 pt** |
+| 座席クラス       | 対象運賃                                                                      | 搭乗ポイント(片道) |
+| ---------------- | ----------------------------------------------------------------------------- | ------------------ |
+| ファーストクラス | フレックス / Biz / ANAカード優待割引 / 株主優待割引 / スタンダード / シンプル | **400 pt**         |
+| エコノミークラス | フレックス / Biz / ANAカード優待割引 / 株主優待割引                           | **400 pt**         |
+| エコノミークラス | スタンダード                                                                  | **200 pt**         |
+| エコノミークラス | シンプル                                                                      | **100 pt**         |
+| ファーストクラス | セール / フレックス(国際線接続専用)                                           | **0 pt**           |
+| エコノミークラス | 島民割引 / セール / ユース / シニア / 各種包括旅行運賃                        | **0 pt**           |
 
 アップグレード時の搭乗ポイントは「元の購入運賃」基準。元運賃が0ptなら0pt。
 
@@ -243,10 +248,10 @@ PP = 区間基本マイレージ
 
 要件「主要路線をハードコードしたテーブル方式でOK」に従い、各路線は **「エコノミー / ファースト」の2つの代表値だけ** を持つ。代表値は以下の典型シナリオで算出する。
 
-| 表示上のクラス | 想定する裏側の運賃 | 積算率 | 搭乗ポイント |
-|---|---|---|---|
-| **エコノミー(代表)** | スタンダード | 80% | 200 pt |
-| **ファースト(代表/デフォルト)** | **シンプル** | **120%** | **400 pt** |
+| 表示上のクラス                  | 想定する裏側の運賃 | 積算率   | 搭乗ポイント |
+| ------------------------------- | ------------------ | -------- | ------------ |
+| **エコノミー(代表)**            | スタンダード       | 80%      | 200 pt       |
+| **ファースト(代表/デフォルト)** | **シンプル**       | **120%** | **400 pt**   |
 
 > **ファーストは「シンプル」を既定**にする。スタンダードは取得難易度が高い一方、シンプルは予約サイトで素直に取れる実用ライン。プレミアム修行の実勢値に近い。エコノミーは依然「スタンダード」を中庸の代表値として採用。
 
@@ -287,68 +292,68 @@ PP(ファースト) = round(区間基本マイレージ × 1.20 × 2) + 400
 
 ### 3-1. 空港マスタ
 
-| コード | 空港名 | 都市 |
-|---|---|---|
-| HND | 羽田 | 東京 |
-| NRT | 成田 | 東京 |
-| FUK | 福岡 | 福岡 |
-| OKA | 那覇 | 沖縄 |
-| CTS | 新千歳 | 札幌 |
-| ITM | 伊丹 | 大阪 |
-| KIX | 関西 | 大阪 |
-| NGO | 中部 | 名古屋 |
-| SDJ | 仙台 | 仙台 |
-| HIJ | 広島 | 広島 |
-| KMJ | 熊本 | 熊本 |
-| KOJ | 鹿児島 | 鹿児島 |
-| NGS | 長崎 | 長崎 |
-| MYJ | 松山 | 松山 |
-| OKJ | 岡山 | 岡山 |
-| HKD | 函館 | 函館 |
-| ISG | 石垣 | 石垣 |
-| MMY | 宮古 | 宮古 |
-| KMI | 宮崎 | 宮崎 |
-| OIT | 大分 | 大分 |
+| コード | 空港名 | 都市   |
+| ------ | ------ | ------ |
+| HND    | 羽田   | 東京   |
+| NRT    | 成田   | 東京   |
+| FUK    | 福岡   | 福岡   |
+| OKA    | 那覇   | 沖縄   |
+| CTS    | 新千歳 | 札幌   |
+| ITM    | 伊丹   | 大阪   |
+| KIX    | 関西   | 大阪   |
+| NGO    | 中部   | 名古屋 |
+| SDJ    | 仙台   | 仙台   |
+| HIJ    | 広島   | 広島   |
+| KMJ    | 熊本   | 熊本   |
+| KOJ    | 鹿児島 | 鹿児島 |
+| NGS    | 長崎   | 長崎   |
+| MYJ    | 松山   | 松山   |
+| OKJ    | 岡山   | 岡山   |
+| HKD    | 函館   | 函館   |
+| ISG    | 石垣   | 石垣   |
+| MMY    | 宮古   | 宮古   |
+| KMI    | 宮崎   | 宮崎   |
+| OIT    | 大分   | 大分   |
 
 ### 3-2. 羽田(HND)発着 主要路線
 
 ファーストPPは「シンプル運賃」基準(積算率120%・搭乗ポイント400)。
 
-| 行先 | 基本マイル | エコノミーPP(片道) | ファーストPP(片道) |
-|---|---:|---:|---:|
-| 新千歳(CTS) | 510 | 1,016 | 1,624 |
-| 仙台(SDJ) | 177 | 483 | 825 |
-| 函館(HKD) | 424 | 878 | 1,418 |
-| 中部(NGO) | 193 | 509 | 863 |
-| 伊丹(ITM)/関西(KIX) | 280 | 648 | 1,072 |
-| 岡山(OKJ) | 356 | 770 | 1,254 |
-| 広島(HIJ) | 414 | 862 | 1,394 |
-| 松山(MYJ) | 438 | 901 | 1,451 |
-| 福岡(FUK) | 567 | 1,107 | 1,761 |
-| 熊本(KMJ) | 568 | 1,109 | 1,763 |
-| 長崎(NGS) | 610 | 1,176 | 1,864 |
-| 大分(OIT) | 499 | 998 | 1,598 |
-| 宮崎(KMI) | 561 | 1,098 | 1,746 |
-| 鹿児島(KOJ) | 601 | 1,162 | 1,842 |
-| 沖縄(OKA) | 984 | 1,774 | 2,762 |
-| 石垣(ISG) | 1,224 | 2,158 | 3,338 |
-| 宮古(MMY) | 1,158 | 2,053 | 3,179 |
+| 行先                | 基本マイル | エコノミーPP(片道) | ファーストPP(片道) |
+| ------------------- | ---------: | -----------------: | -----------------: |
+| 新千歳(CTS)         |        510 |              1,016 |              1,624 |
+| 仙台(SDJ)           |        177 |                483 |                825 |
+| 函館(HKD)           |        424 |                878 |              1,418 |
+| 中部(NGO)           |        193 |                509 |                863 |
+| 伊丹(ITM)/関西(KIX) |        280 |                648 |              1,072 |
+| 岡山(OKJ)           |        356 |                770 |              1,254 |
+| 広島(HIJ)           |        414 |                862 |              1,394 |
+| 松山(MYJ)           |        438 |                901 |              1,451 |
+| 福岡(FUK)           |        567 |              1,107 |              1,761 |
+| 熊本(KMJ)           |        568 |              1,109 |              1,763 |
+| 長崎(NGS)           |        610 |              1,176 |              1,864 |
+| 大分(OIT)           |        499 |                998 |              1,598 |
+| 宮崎(KMI)           |        561 |              1,098 |              1,746 |
+| 鹿児島(KOJ)         |        601 |              1,162 |              1,842 |
+| 沖縄(OKA)           |        984 |              1,774 |              2,762 |
+| 石垣(ISG)           |      1,224 |              2,158 |              3,338 |
+| 宮古(MMY)           |      1,158 |              2,053 |              3,179 |
 
 ### 3-3. 福岡(FUK)発着 主要路線
 
 ファーストPPは「シンプル運賃」基準(積算率120%・搭乗ポイント400)。
 
-| 行先 | 基本マイル | エコノミーPP(片道) | ファーストPP(片道) |
-|---|---:|---:|---:|
-| 羽田(HND) | 567 | 1,107 | 1,761 |
-| 中部(NGO) | 374 | 798 | 1,298 |
-| 伊丹/関西(ITM/KIX) | 287 | 659 | 1,089 |
-| 新千歳(CTS) | 882 | 1,611 | 2,517 |
-| 仙台(SDJ) | 665 | 1,264 | 1,996 |
-| 那覇(OKA) | 537 | 1,059 | 1,689 |
-| 宮古(MMY) | 683 | 1,293 | 2,039 |
-| 石垣(ISG) | 737 | 1,379 | 2,169 |
-| 宮崎(KMI) | 131 | 410 | 714 |
+| 行先               | 基本マイル | エコノミーPP(片道) | ファーストPP(片道) |
+| ------------------ | ---------: | -----------------: | -----------------: |
+| 羽田(HND)          |        567 |              1,107 |              1,761 |
+| 中部(NGO)          |        374 |                798 |              1,298 |
+| 伊丹/関西(ITM/KIX) |        287 |                659 |              1,089 |
+| 新千歳(CTS)        |        882 |              1,611 |              2,517 |
+| 仙台(SDJ)          |        665 |              1,264 |              1,996 |
+| 那覇(OKA)          |        537 |              1,059 |              1,689 |
+| 宮古(MMY)          |        683 |              1,293 |              2,039 |
+| 石垣(ISG)          |        737 |              1,379 |              2,169 |
+| 宮崎(KMI)          |        131 |                410 |                714 |
 
 > 福岡→大阪/中部/沖縄あたりが「中距離・短時間で乗りやすい」ゾーン。修行のメインルートになりやすい。
 
@@ -356,47 +361,64 @@ PP(ファースト) = round(区間基本マイレージ × 1.20 × 2) + 400
 
 ファーストPPは「シンプル運賃」基準(積算率120%・搭乗ポイント400)。
 
-| 行先 | 基本マイル | エコノミーPP(片道) | ファーストPP(片道) |
-|---|---:|---:|---:|
-| 羽田(HND) | 984 | 1,774 | 2,762 |
-| 中部(NGO) | 809 | 1,494 | 2,342 |
-| 伊丹/関西(ITM/KIX) | 739 | 1,382 | 2,174 |
-| 新千歳(CTS) | 1,397 | 2,435 | 3,753 |
-| 仙台(SDJ) | 1,130 | 2,008 | 3,112 |
-| 福岡(FUK) | 537 | 1,059 | 1,689 |
-| 広島(HIJ) | 650 | 1,240 | 1,960 |
-| 松山(MYJ) | 607 | 1,171 | 1,857 |
-| 熊本(KMJ) | 494 | 990 | 1,586 |
-| 鹿児島(KOJ) | 429 | 886 | 1,430 |
-| 宮古(MMY) | 177 | 483 | 825 |
-| 石垣(ISG) | 247 | 595 | 993 |
+| 行先               | 基本マイル | エコノミーPP(片道) | ファーストPP(片道) |
+| ------------------ | ---------: | -----------------: | -----------------: |
+| 羽田(HND)          |        984 |              1,774 |              2,762 |
+| 中部(NGO)          |        809 |              1,494 |              2,342 |
+| 伊丹/関西(ITM/KIX) |        739 |              1,382 |              2,174 |
+| 新千歳(CTS)        |      1,397 |              2,435 |              3,753 |
+| 仙台(SDJ)          |      1,130 |              2,008 |              3,112 |
+| 福岡(FUK)          |        537 |              1,059 |              1,689 |
+| 広島(HIJ)          |        650 |              1,240 |              1,960 |
+| 松山(MYJ)          |        607 |              1,171 |              1,857 |
+| 熊本(KMJ)          |        494 |                990 |              1,586 |
+| 鹿児島(KOJ)        |        429 |                886 |              1,430 |
+| 宮古(MMY)          |        177 |                483 |                825 |
+| 石垣(ISG)          |        247 |                595 |                993 |
 
 > **OKA-CTS は片道2,435 PPの最強路線**。エコノミー往復で4,870 PP、約10往復で50,000到達。修行界隈で有名な「沖止め最大効率ルート」。
 
 ### 3-5. ハードコード用JSONフォーマット
 
-`shared/routes.ts` で以下の形で持つ想定。
+`packages/core/src/routes.ts` で以下の形で持つ想定。
 
 ```ts
-export type CabinClass = 'economy' | 'first'
+export type CabinClass = "economy" | "first";
 export type AirportCode =
-  | 'HND' | 'NRT' | 'FUK' | 'OKA' | 'CTS' | 'ITM' | 'KIX' | 'NGO'
-  | 'SDJ' | 'HIJ' | 'KMJ' | 'KOJ' | 'NGS' | 'MYJ' | 'OKJ' | 'HKD'
-  | 'ISG' | 'MMY' | 'KMI' | 'OIT'
+  | "HND"
+  | "NRT"
+  | "FUK"
+  | "OKA"
+  | "CTS"
+  | "ITM"
+  | "KIX"
+  | "NGO"
+  | "SDJ"
+  | "HIJ"
+  | "KMJ"
+  | "KOJ"
+  | "NGS"
+  | "MYJ"
+  | "OKJ"
+  | "HKD"
+  | "ISG"
+  | "MMY"
+  | "KMI"
+  | "OIT";
 
 export interface Route {
-  from: AirportCode
-  to: AirportCode
-  baseMiles: number
-  ppEconomy: number   // 片道PP(エコノミー代表値: スタンダード相当)
-  ppFirst: number     // 片道PP(ファースト代表値: スタンダード相当)
+  from: AirportCode;
+  to: AirportCode;
+  baseMiles: number;
+  ppEconomy: number; // 片道PP(エコノミー代表値: スタンダード相当)
+  ppFirst: number; // 片道PP(ファースト代表値: スタンダード相当)
 }
 
 export const ROUTES: Route[] = [
-  { from: 'HND', to: 'FUK', baseMiles: 567, ppEconomy: 1107, ppFirst: 1761 },
-  { from: 'HND', to: 'OKA', baseMiles: 984, ppEconomy: 1774, ppFirst: 2762 },
+  { from: "HND", to: "FUK", baseMiles: 567, ppEconomy: 1107, ppFirst: 1761 },
+  { from: "HND", to: "OKA", baseMiles: 984, ppEconomy: 1774, ppFirst: 2762 },
   // ... 上記表の値をそのまま列挙
-]
+];
 ```
 
 `ppFirst` は「ファースト×シンプル運賃」を既定値として算出している(積算率120%・搭乗ポイント400)。上位運賃(スタンダード/フレックス等)の積算をしたい場合は、フライト登録フォームで PP を手動入力して上書きする運用。
@@ -417,14 +439,16 @@ https://aswbe-i.ana.co.jp/internet/dms/ic21/ICW010Action.do?depAirportCd={FROM}&
 
 ## 4. 技術スタック
 
-| レイヤ | 採用技術 | 理由 |
-|---|---|---|
-| フレームワーク | **Nuxt 4** | 要件指定。SSR + Server Routes が1つで完結 |
-| 言語 | TypeScript | 型安全 |
-| 認証/DB | **Supabase** (@nuxtjs/supabase) | 要件指定。Auth + Postgres + RLSが揃う |
-| バリデーション | **Zod** + **VeeValidate**(@vee-validate/zod) | 要件指定。フロント・サーバで同一スキーマ |
-| CSS | **SCSS** | 要件指定。Vue SFCの `<style lang="scss">` で記述 |
-| CSV | papaparse | バルクimport / sample csv生成 |
+| レイヤ         | 採用技術                                     | 理由                                                                                           |
+| -------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| フレームワーク | **Nuxt 4**                                   | 要件指定。SSR + Server Routes が1つで完結                                                      |
+| 言語           | TypeScript                                   | 型安全                                                                                         |
+| 認証/DB        | **Supabase** (@nuxtjs/supabase)              | 要件指定。Auth + Postgres + RLSが揃う                                                          |
+| バリデーション | **Zod** + **VeeValidate**(@vee-validate/zod) | 要件指定。フロント・サーバで同一スキーマ                                                       |
+| CSS            | **SCSS**                                     | 要件指定。Vue SFCの `<style lang="scss">` で記述                                               |
+| CSV            | papaparse                                    | バルクimport / sample csv生成                                                                  |
+| API            | **Hono** on Cloudflare Workers               | Web と iOS の共通バックエンド。詳細は [docs/hono-ios-migration.md](docs/hono-ios-migration.md) |
+| モノレポ       | pnpm workspace                               | `packages/core` を Web・API の双方から使う                                                     |
 
 ### バージョン固定方針
 
@@ -434,121 +458,114 @@ https://aswbe-i.ana.co.jp/internet/dms/ic21/ICW010Action.do?depAirportCd={FROM}&
 
 ## 5. アーキテクチャ・ディレクトリ構成
 
-Nuxt 4 の `app/` ディレクトリ構成 + 共通レイアウトを `app/layouts/` に置く。
+pnpm ワークスペースで、ドメインロジック (`packages/core`)・API (`apps/api`)・
+Web (`apps/web`) を分けている。iOS アプリを足すにあたって、PP の計算規則を
+1箇所に保ったまま複数のクライアントから使えるようにするため。
+経緯と残りの工程は [docs/hono-ios-migration.md](docs/hono-ios-migration.md)。
 
 ```
-ana-pp-tracker/
+ana-pp-tracker/                     ← pnpm ワークスペースのルート
 ├── README.md                       ← このファイル
-├── nuxt.config.ts
-├── package.json
-├── tsconfig.json
-├── .env.local                      ← Supabaseキー(gitignore)
+├── package.json                    ← 各ワークスペースへ委譲するスクリプトだけ
+├── pnpm-workspace.yaml
+├── eslint.config.mjs               ← リポジトリ全体を1つの設定で見る
+├── vitest.config.ts                ← projects で各ワークスペースのテストをまとめて回す
 │
-├── app/
-│   ├── app.vue                     ← <NuxtLayout><NuxtPage/></NuxtLayout>
-│   │
-│   ├── layouts/                    ← 共通レイアウト(要件)
-│   │   ├── default.vue             ← ヘッダ・ナビ・フッタ込み(ログイン後の主レイアウト)
-│   │   └── auth.vue                ← ログイン/サインアップ用の最小レイアウト
-│   │
-│   ├── pages/                      ← ルーティング
-│   │   ├── index.vue               ← ダッシュボード(PP累計 / 50k残り / 路線サジェスト)
-│   │   ├── login.vue               ← ログイン / サインアップ (layout: 'auth') — Email + パスワード
-│   │   ├── confirm.vue             ← メール確認リンクのコールバック(サインアップ後の戻り先)
-│   │   ├── flights/
-│   │   │   ├── index.vue           ← フライト一覧 + レビュー閲覧
-│   │   │   ├── new.vue             ← 新規登録フォーム
-│   │   │   └── [id].vue            ← 詳細/編集
-│   │   ├── import.vue              ← CSVインポート + サンプルDL
-│   │   └── routes.vue              ← 路線テーブル(エコノミー/ファースト切替)
-│   │
-│   ├── components/
-│   │   ├── pp/
-│   │   │   ├── PPSummaryCard.vue   ← 現在PP・残PP・プログレスバー
-│   │   │   ├── PPGoalHint.vue      ← 「FUK-OKAなら あと X 往復」
-│   │   │   └── RouteCard.vue       ← 路線1件のカード(予約リンク付き)
-│   │   ├── flight/
-│   │   │   ├── FlightForm.vue      ← 登録フォーム(VeeValidate + Zod)
-│   │   │   ├── FlightListItem.vue  ← 一覧の1行
-│   │   │   └── RatingStars.vue     ← ★1〜5
-│   │   ├── import/
-│   │   │   ├── CsvDropzone.vue
-│   │   │   └── CsvPreviewTable.vue
-│   │   └── ui/
-│   │       ├── BaseButton.vue
-│   │       ├── BaseField.vue       ← VeeValidateフィールド共通ラッパ
-│   │       ├── BaseSelect.vue
-│   │       └── HeaderNav.vue
-│   │
-│   ├── composables/
-│   │   ├── useFlights.ts           ← /api/flights を叩く
-│   │   ├── usePPStats.ts           ← 累計・残量・サジェスト算出
-│   │   └── useCsv.ts               ← papaparse ラッパ
-│   │
-│   ├── assets/
-│   │   └── styles/
-│   │       ├── _tokens.scss        ← カラー・タイポ等のトークン
-│   │       ├── _mixins.scss        ← レスポンシブ等
-│   │       ├── _reset.scss
-│   │       └── main.scss           ← @use で集約してエントリ
-│   │
-│   └── middleware/
-│       └── auth.global.ts          ← 未ログインなら/loginへ(@nuxtjs/supabaseのredirectOptionsで代替可)
+├── apps/web/                       ← Nuxt 4 (SPA)。apps/api のクライアント
+│   ├── nuxt.config.ts
+│   ├── .env                        ← Supabaseキー / APIのベースURL (gitignore)
+│   ├── app/
+│   │   ├── app.vue                 ← <NuxtLayout><NuxtPage/></NuxtLayout>
+│   │   ├── layouts/
+│   │   │   ├── default.vue         ← ヘッダ・ナビ込み(ログイン後の主レイアウト)
+│   │   │   └── auth.vue            ← ログイン用の最小レイアウト
+│   │   ├── pages/
+│   │   │   ├── index.vue           ← ダッシュボード(PP累計 / 50k残り / 路線サジェスト)
+│   │   │   ├── login.vue           ← ログイン / サインアップ (layout: 'auth')
+│   │   │   ├── confirm.vue         ← メール確認リンクのコールバック
+│   │   │   ├── flights/
+│   │   │   │   ├── index.vue       ← フライト一覧 + レビュー閲覧
+│   │   │   │   ├── new.vue         ← 新規登録フォーム
+│   │   │   │   └── [id].vue        ← 詳細/編集
+│   │   │   ├── import.vue          ← CSVインポート + サンプルDL
+│   │   │   └── routes.vue          ← 路線テーブル(エコノミー/ファースト切替)
+│   │   ├── components/
+│   │   │   ├── pp/                 ← PPSummaryCard / PPGoalHint / RouteCard ほか
+│   │   │   ├── flight/             ← FlightForm を分割したもの + 一覧テーブル
+│   │   │   ├── import/             ← CsvDropzone / CsvPreviewTable / CsvStatusStrip
+│   │   │   └── ui/                 ← HeaderNav / PageHeader / 各種 Pill / Segmented
+│   │   ├── composables/
+│   │   │   ├── useApi.ts           ← APIのベースURLと Authorization ヘッダ
+│   │   │   ├── useFlights.ts       ← apps/api を叩く
+│   │   │   ├── usePPCalc.ts        ← 入力中のPP内訳(@ana/core を直接呼ぶ)
+│   │   │   ├── usePPStats.ts       ← 年間サマリー
+│   │   │   └── useCsv.ts           ← papaparse ラッパ
+│   │   ├── utils/                  ← errorMessage / ppTotals
+│   │   └── assets/styles/          ← _tokens / _mixins / _reset / main.scss
+│   └── test/                       ← Nuxt に依存しないユーティリティのテスト
 │
-├── shared/                         ← フロント・サーバ共有(Nuxt4の標準ディレクトリ)
-│   ├── routes.ts                   ← 3章の路線テーブル
-│   ├── schema.ts                   ← Zodスキーマ(FlightInput等)
-│   └── pp.ts                       ← PP集計・サジェストロジック
+├── apps/api/                       ← Hono on Cloudflare Workers
+│   ├── wrangler.jsonc
+│   ├── src/
+│   │   ├── index.ts                ← CORS・エラーハンドラ・ルート登録
+│   │   ├── middleware/auth.ts      ← Bearer 検証 + RLS 付き Supabase クライアント
+│   │   ├── lib/                    ← errors / validator / query
+│   │   └── routes/                 ← flights / stats / pp
+│   └── test/                       ← app.request() によるハンドラテスト
 │
-├── server/
-│   ├── api/
-│   │   ├── flights/
-│   │   │   ├── index.get.ts        ← 一覧(クエリ: year, limit)
-│   │   │   ├── index.post.ts       ← 新規登録
-│   │   │   ├── [id].get.ts
-│   │   │   ├── [id].patch.ts
-│   │   │   └── [id].delete.ts
-│   │   ├── flights/import.post.ts  ← CSVバルクインポート
-│   │   ├── flights/sample-csv.get.ts ← サンプルCSVのDL
-│   │   └── stats/summary.get.ts    ← 累計PP・残量・サジェスト
-│   └── utils/
-│       └── supabase.ts             ← serverSupabaseClient ラッパ
+├── packages/core/                  ← ドメインロジック(Nuxt にも Hono にも依存しない)
+│   ├── src/
+│   │   ├── routes.ts               ← 3章の路線テーブル
+│   │   ├── airports.ts             ← 空港マスタ
+│   │   ├── schema.ts               ← Zodスキーマ(FlightInput等)
+│   │   ├── pp.ts                   ← PP計算・サジェストロジック
+│   │   ├── ppSummary.ts            ← 年間集計
+│   │   ├── marketFares.ts          ← 市場価格の目安
+│   │   ├── flightRow.ts            ← FlightInput → flights の列
+│   │   └── database.types.ts       ← flights テーブルの行の型
+│   └── test/
 │
-└── supabase/
-    └── migrations/
-        └── 20260101000000_create_flights.sql
+├── supabase/
+│   └── migrations/
+│       └── 20260101000000_create_flights.sql
+│
+└── docs/
+    ├── hono-ios-migration.md       ← Hono + iOS への移行計画(進行中)
+    ├── refactoring-proposals.md
+    └── design-tone/
 ```
 
 ### 設計メモ
 
-- **共通データは `shared/` に置く**。ハードコードした路線ごとのPPテーブルのように、フロントからもサーバからも参照したいデータは `shared/` に入れると両方から `import` できる（Nuxt 4 の標準ディレクトリ）。
-- **`ROUTES` のような全大文字は「変更されない定数」を表す慣習**。`shared/` 配下のマスタデータはこの命名で統一している。
+- **ドメインロジックは `packages/core/` に置く**。路線テーブル・PP計算・Zodスキーマのように、フロントからもサーバからも参照するものはここに集約し、`@ana/core/routes` のようなサブパスで import する。Nuxt にもh3にも依存しないので、Nuxt を起動せずに型チェックとテストができる。
+- **`ROUTES` のような全大文字は「変更されない定数」を表す慣習**。`packages/core/` 配下のマスタデータはこの命名で統一している。
+- 以前は Nuxt 標準の `shared/` ディレクトリに置いていた。バックエンドを Hono に移す前段として、Nuxt から切り離した独立パッケージにしてある。経緯と移行計画は [docs/hono-ios-migration.md](docs/hono-ios-migration.md)。
 
-### リポジトリ直下のその他のディレクトリ
+### その他のディレクトリ
 
-| パス | 役割 |
-| --- | --- |
-| `docs/design-tone/` | 実装前のデザイン検討用モックアップ（React/JSX）。アプリのビルド対象外。詳細は [docs/design-tone/README.md](docs/design-tone/README.md) |
-| `test/fixtures/` | CSVインポートの動作確認用サンプル |
-| `supabase/migrations/` | Supabase のマイグレーションSQL |
+| パス                      | 役割                                                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/design-tone/`       | 実装前のデザイン検討用モックアップ（React/JSX）。アプリのビルド対象外。詳細は [docs/design-tone/README.md](docs/design-tone/README.md) |
+| `apps/web/test/fixtures/` | CSVインポートの動作確認用サンプル                                                                                                      |
+| `supabase/migrations/`    | Supabase のマイグレーションSQL                                                                                                         |
 
-> アプリのスタイルの正は `app/assets/styles/main.scss`。以前リポジトリ直下にあった `main.css` はそのコンパイル済み出力で、どこからも参照されていなかったため削除し `.gitignore` に登録した。
+> アプリのスタイルの正は `apps/web/app/assets/styles/main.scss`。以前リポジトリ直下にあった `main.css` はそのコンパイル済み出力で、どこからも参照されていなかったため削除し `.gitignore` に登録した。
 
-### 主要設定: `nuxt.config.ts`
+### 主要設定: `apps/web/nuxt.config.ts`
 
 ```ts
 export default defineNuxtConfig({
-  compatibilityDate: '2026-01-01',
+  compatibilityDate: "2026-01-01",
   future: { compatibilityVersion: 4 },
 
-  modules: ['@nuxtjs/supabase', '@vee-validate/nuxt'],
+  modules: ["@nuxtjs/supabase", "@vee-validate/nuxt"],
 
   supabase: {
     redirectOptions: {
-      login: '/login',
-      callback: '/confirm',
-      include: ['/', '/flights', '/flights/**', '/import', '/routes'],
-      exclude: ['/login', '/confirm'],
+      login: "/login",
+      callback: "/confirm",
+      include: ["/", "/flights", "/flights/**", "/import", "/routes"],
+      exclude: ["/login", "/confirm"],
     },
   },
 
@@ -556,11 +573,7 @@ export default defineNuxtConfig({
     autoImports: true,
   },
 
-  imports: {
-    dirs: ['shared'],
-  },
-
-  css: ['~/assets/styles/main.scss'],
+  css: ["~/assets/styles/main.scss"],
 
   vite: {
     css: {
@@ -571,7 +584,7 @@ export default defineNuxtConfig({
       },
     },
   },
-})
+});
 ```
 
 ---
@@ -582,25 +595,25 @@ export default defineNuxtConfig({
 
 ユーザごとに搭乗1件 = 1行(片道単位)。往復は2行で表現する。
 
-| カラム | 型 | NULL | 説明 |
-|---|---|---|---|
-| id | uuid | NOT NULL | PK, `gen_random_uuid()` |
-| user_id | uuid | NOT NULL | `auth.users(id)` 参照, ON DELETE CASCADE |
-| flown_at | date | NOT NULL | 搭乗日 |
-| flight_number | text | NULL | 例: NH256 |
-| from_airport | text(3) | NOT NULL | IATAコード |
-| to_airport | text(3) | NOT NULL | IATAコード |
-| cabin | text | NOT NULL | `'economy' \| 'first'` |
-| fare_type | text | NULL | 'standard' / 'flex' / 'simple' / 'sale' 等(将来拡張) |
-| pp | integer | NOT NULL | 積算PP。テーブルから自動計算、ユーザ上書き可 |
-| aircraft | text | NULL | 例: B787-9, A321neo |
-| seat | text | NULL | 例: 1A |
-| lounge | text | NULL | 利用ラウンジ名 |
-| rating_seat | smallint | NULL | 1〜5 |
-| rating_aircraft | smallint | NULL | 1〜5 |
-| rating_lounge | smallint | NULL | 1〜5 |
-| notes | text | NULL | 自由記述 |
-| created_at | timestamptz | NOT NULL | `now()` |
+| カラム          | 型          | NULL     | 説明                                                 |
+| --------------- | ----------- | -------- | ---------------------------------------------------- |
+| id              | uuid        | NOT NULL | PK, `gen_random_uuid()`                              |
+| user_id         | uuid        | NOT NULL | `auth.users(id)` 参照, ON DELETE CASCADE             |
+| flown_at        | date        | NOT NULL | 搭乗日                                               |
+| flight_number   | text        | NULL     | 例: NH256                                            |
+| from_airport    | text(3)     | NOT NULL | IATAコード                                           |
+| to_airport      | text(3)     | NOT NULL | IATAコード                                           |
+| cabin           | text        | NOT NULL | `'economy' \| 'first'`                               |
+| fare_type       | text        | NULL     | 'standard' / 'flex' / 'simple' / 'sale' 等(将来拡張) |
+| pp              | integer     | NOT NULL | 積算PP。テーブルから自動計算、ユーザ上書き可         |
+| aircraft        | text        | NULL     | 例: B787-9, A321neo                                  |
+| seat            | text        | NULL     | 例: 1A                                               |
+| lounge          | text        | NULL     | 利用ラウンジ名                                       |
+| rating_seat     | smallint    | NULL     | 1〜5                                                 |
+| rating_aircraft | smallint    | NULL     | 1〜5                                                 |
+| rating_lounge   | smallint    | NULL     | 1〜5                                                 |
+| notes           | text        | NULL     | 自由記述                                             |
+| created_at      | timestamptz | NOT NULL | `now()`                                              |
 
 ### マイグレーション SQL(コピペ用)
 
@@ -649,7 +662,12 @@ create policy "flights: owner can delete"
 
 ---
 
-## 7. API仕様(Nuxt Server Routes)
+## 7. API仕様
+
+> エンドポイントは `apps/api` (Hono) に移った。パスは `/api` 接頭辞が外れ、
+> 認証は Cookie ではなく `Authorization: Bearer <token>`、エラーの形は
+> `{ error: { message, issues? } }` に統一されている。
+> 最新は [apps/api/README.md](apps/api/README.md) を参照。以下は移行前の記述。
 
 すべて `server/api/` 配下。認証は `serverSupabaseUser(event)` で取得し、未認証なら 401。
 
@@ -657,8 +675,8 @@ create policy "flights: owner can delete"
 
 ```ts
 // utils
-throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-throw createError({ statusCode: 400, statusMessage: 'Validation failed', data: { issues } })
+throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+throw createError({ statusCode: 400, statusMessage: "Validation failed", data: { issues } });
 ```
 
 ### 7-1. `GET /api/flights`
@@ -666,6 +684,7 @@ throw createError({ statusCode: 400, statusMessage: 'Validation failed', data: {
 クエリ: `year` (default 当年), `limit` (default 100), `offset` (default 0)
 
 レスポンス:
+
 ```ts
 { items: FlightRow[], total: number }
 ```
@@ -674,8 +693,9 @@ throw createError({ statusCode: 400, statusMessage: 'Validation failed', data: {
 
 リクエスト Body: `flightInputSchema` (Zod, 後述)
 サーバ側で:
+
 1. Zodで検証
-2. `pp` が未指定なら `shared/routes.ts` のテーブルから自動算出してセット
+2. `pp` が未指定なら `packages/core/src/routes.ts` のテーブルから自動算出してセット
 3. `user_id` は `auth.uid()` から
 4. insertしたレコードを返す
 
@@ -688,6 +708,7 @@ throw createError({ statusCode: 400, statusMessage: 'Validation failed', data: {
 CSVバルクインポート。リクエストは `multipart/form-data` で CSV ファイル。
 
 処理:
+
 1. PapaParseでヘッダ付きパース
 2. 各行を `flightInputSchema` で検証
 3. 1件でも検証エラーがあれば「rowごとのエラー」を返してロールバック(`{ ok: false, errors: [{ row, issues }] }`)
@@ -708,58 +729,80 @@ flown_at,flight_number,from_airport,to_airport,cabin,fare_type,pp,aircraft,seat,
 ### 7-6. `GET /api/stats/summary`
 
 レスポンス:
+
 ```ts
 {
-  year: number
-  totalPP: number
-  goalPP: 50000
-  remainingPP: number
-  progress: number               // 0〜1
-  flightsCount: number
+  year: number;
+  totalPP: number;
+  goalPP: 50000;
+  remainingPP: number;
+  progress: number; // 0〜1
+  flightsCount: number;
   suggestions: Array<{
-    from: AirportCode
-    to: AirportCode
-    cabin: CabinClass
-    ppRoundTrip: number
-    roundTripsNeeded: number
-  }>
+    from: AirportCode;
+    to: AirportCode;
+    cabin: CabinClass;
+    ppRoundTrip: number;
+    roundTripsNeeded: number;
+  }>;
 }
 ```
 
 `suggestions` は福岡・那覇・羽田起点の主要路線について「あと何往復で50,000に届くか」を返す。
 
-### Zodスキーマ(`shared/schema.ts` 抜粋)
+### Zodスキーマ(`packages/core/src/schema.ts` 抜粋)
 
 ```ts
-import { z } from 'zod'
+import { z } from "zod";
 
 export const airportCodeSchema = z.enum([
-  'HND','NRT','FUK','OKA','CTS','ITM','KIX','NGO','SDJ','HIJ',
-  'KMJ','KOJ','NGS','MYJ','OKJ','HKD','ISG','MMY','KMI','OIT',
-])
+  "HND",
+  "NRT",
+  "FUK",
+  "OKA",
+  "CTS",
+  "ITM",
+  "KIX",
+  "NGO",
+  "SDJ",
+  "HIJ",
+  "KMJ",
+  "KOJ",
+  "NGS",
+  "MYJ",
+  "OKJ",
+  "HKD",
+  "ISG",
+  "MMY",
+  "KMI",
+  "OIT",
+]);
 
-export const cabinClassSchema = z.enum(['economy', 'first'])
+export const cabinClassSchema = z.enum(["economy", "first"]);
 
-export const flightInputSchema = z.object({
-  flown_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  flight_number: z.string().trim().max(10).optional().or(z.literal('')),
-  from_airport: airportCodeSchema,
-  to_airport: airportCodeSchema,
-  cabin: cabinClassSchema,
-  fare_type: z.string().optional().nullable(),
-  pp: z.number().int().min(0).max(20000).optional().nullable(),
-  aircraft: z.string().trim().max(40).optional().or(z.literal('')),
-  seat: z.string().trim().max(10).optional().or(z.literal('')),
-  lounge: z.string().trim().max(40).optional().or(z.literal('')),
-  rating_seat: z.number().int().min(1).max(5).optional().nullable(),
-  rating_aircraft: z.number().int().min(1).max(5).optional().nullable(),
-  rating_lounge: z.number().int().min(1).max(5).optional().nullable(),
-  notes: z.string().trim().max(2000).optional().or(z.literal('')),
-}).refine(d => d.from_airport !== d.to_airport, {
-  path: ['to_airport'], message: '出発地と到着地が同じです',
-})
+export const flightInputSchema = z
+  .object({
+    flown_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    flight_number: z.string().trim().max(10).optional().or(z.literal("")),
+    from_airport: airportCodeSchema,
+    to_airport: airportCodeSchema,
+    cabin: cabinClassSchema,
+    fare_type: z.string().optional().nullable(),
+    pp: z.number().int().min(0).max(20000).optional().nullable(),
+    aircraft: z.string().trim().max(40).optional().or(z.literal("")),
+    seat: z.string().trim().max(10).optional().or(z.literal("")),
+    lounge: z.string().trim().max(40).optional().or(z.literal("")),
+    rating_seat: z.number().int().min(1).max(5).optional().nullable(),
+    rating_aircraft: z.number().int().min(1).max(5).optional().nullable(),
+    rating_lounge: z.number().int().min(1).max(5).optional().nullable(),
+    notes: z.string().trim().max(2000).optional().or(z.literal("")),
+  })
+  .refine((d) => d.from_airport !== d.to_airport, {
+    path: ["to_airport"],
+    message: "出発地と到着地が同じです",
+  });
 
-export type FlightInput = z.infer<typeof flightInputSchema>
+export type FlightInput = z.infer<typeof flightInputSchema>;
 ```
 
 ---
@@ -817,6 +860,7 @@ export type FlightInput = z.infer<typeof flightInputSchema>
 `FlightForm` 1枚。VeeValidate + Zod。
 
 入力欄:
+
 - 搭乗日(date input)
 - 便名(text)
 - 出発 / 到着(select)
@@ -892,20 +936,20 @@ flown_at,flight_number,from_airport,to_airport,cabin,fare_type,pp,aircraft,seat,
 
 ### カラーパレット
 
-| トークン名 | 色 | 用途 |
-|---|---|---|
-| `--ana-deep` | `#002244` | 見出し / プライマリボタン背景 |
-| `--ana-primary` | `#13448F` | リンク / アクセント |
-| `--ana-bright` | `#1E5BC6` | ホバー / フォーカスリング |
-| `--ana-sky` | `#6B9BD8` | サブテキスト |
-| `--ana-mist` | `#E8EEF7` | カード薄背景 |
-| `--ana-paper` | `#FAFBFD` | ページ背景 |
-| `--ana-gold` | `#B89B5E` | ファーストクラス / 上位ステイタス |
-| `--ana-red` | `#D63340` | エラー / 警告 |
-| `--ink` | `#0A1628` | 本文 |
-| `--ink-soft` | `#3A4A63` | 本文セカンダリ |
-| `--ink-mute` | `#6A788A` | キャプション |
-| `--line` | `#DCE3ED` | ボーダー |
+| トークン名      | 色        | 用途                              |
+| --------------- | --------- | --------------------------------- |
+| `--ana-deep`    | `#002244` | 見出し / プライマリボタン背景     |
+| `--ana-primary` | `#13448F` | リンク / アクセント               |
+| `--ana-bright`  | `#1E5BC6` | ホバー / フォーカスリング         |
+| `--ana-sky`     | `#6B9BD8` | サブテキスト                      |
+| `--ana-mist`    | `#E8EEF7` | カード薄背景                      |
+| `--ana-paper`   | `#FAFBFD` | ページ背景                        |
+| `--ana-gold`    | `#B89B5E` | ファーストクラス / 上位ステイタス |
+| `--ana-red`     | `#D63340` | エラー / 警告                     |
+| `--ink`         | `#0A1628` | 本文                              |
+| `--ink-soft`    | `#3A4A63` | 本文セカンダリ                    |
+| `--ink-mute`    | `#6A788A` | キャプション                      |
+| `--line`        | `#DCE3ED` | ボーダー                          |
 
 ### タイポグラフィ
 
@@ -957,11 +1001,11 @@ assets/styles/
 3. `app/assets/styles/` の SCSSファイル4つを作成
 4. `app/layouts/default.vue` `app/layouts/auth.vue` のシェルを作成
 
-### Step 2: shared定数(15分)
+### Step 2: ドメイン定数(15分)
 
-1. `shared/routes.ts` に 3章の路線テーブルを全部書き出す
-2. `shared/schema.ts` にZodスキーマ
-3. `shared/pp.ts` に `calcPP()`, `roundTripsNeeded()`, `getSuggestions()` を実装
+1. `packages/core/src/routes.ts` に 3章の路線テーブルを全部書き出す
+2. `packages/core/src/schema.ts` にZodスキーマ
+3. `packages/core/src/pp.ts` に `calcPP()`, `roundTripsNeeded()`, `getSuggestions()` を実装
 
 ### Step 3: 認証(10分・Supabase設定済み前提)
 
@@ -1005,25 +1049,32 @@ assets/styles/
 ## 12. トラブルシューティング
 
 ### `@nuxtjs/supabase` で `Cannot find module` が出る
+
 → `pnpm install` を `node_modules` 削除後にやり直す。
 
 ### メール確認リンクを踏んでも `/login` に戻されてしまう
+
 → Supabase ダッシュボードの **Authentication → URL Configuration** で Site URL に `http://localhost:3000` を、Redirect URLs に `http://localhost:3000/confirm` を追加。`@nuxtjs/supabase` 側は `redirectOptions.callback = '/confirm'` と整合させる。
 
 ### サインアップ直後にログイン画面に戻されてしまう
+
 → Email Confirm が ON だと、メール内のリンクを踏むまでセッションが張られない。挙動として正しい。確認リンクを踏ませる導線(「確認メールを送りました」というメッセージ)を `/login` に出すこと。手早く検証だけしたいなら **Authentication → Providers → Email** の Confirm email を一時的に OFF にする手もある。
 
 ### 「`auth.uid()` が null」とRLSではじかれる
+
 → Server Routes 側で `serverSupabaseClient(event)` を使う(`serverSupabaseServiceRole` ではない)。RLS下のクライアントは認証Cookieを引き継ぐ。
 
 ### SCSSの `@import` が deprecated 警告を出す
+
 → Dart Sassの最新仕様。`@use` `@forward` に書き換える。`additionalData` も `@use ... as *;` を推奨。
 
 ### CSVの日本語が文字化け
+
 → Papaparseに `encoding: 'utf-8'` を明示。Excelで開くBOM対策で、サンプルCSVの先頭に BOM(`\uFEFF`)を入れる手もある。
 
 ### 機内Wi-Fiが死んだ
-→ Supabase本番APIは当然届かないので、 **`supabase start` (Supabase CLI)** でローカルSupabaseを離陸前に立ち上げておくと完全オフラインで開発できる。`.env.local` をローカル用に切り替えてどうぞ。
+
+→ Supabase本番APIは当然届かないので、 **`supabase start` (Supabase CLI)** でローカルSupabaseを離陸前に立ち上げておくと完全オフラインで開発できる。`apps/web/.env` をローカル用に切り替えてどうぞ。
 
 ---
 

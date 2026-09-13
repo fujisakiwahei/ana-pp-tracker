@@ -1,0 +1,18 @@
+{
+  // ここに残っているのは Nuxt ランタイムに触らないテストだけ。
+  // ドメインロジック (旧 shared/) のテストは packages/core/test/ へ移した。
+  // 対象の server/utils/flightRow.ts と app/utils/ppTotals.ts は
+  // h3 / Vue のグローバルを使わない素の TS なので、Nuxt の生成 tsconfig を
+  // 継承する必要がなくなった。
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": []
+  },
+  "include": ["./**/*.ts"]
+}
