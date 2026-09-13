@@ -14,6 +14,12 @@ export function useApi() {
   } = useRuntimeConfig();
   const session = useSupabaseSession();
 
+  if (!apiBase) {
+    throw new Error(
+      "NUXT_PUBLIC_API_BASE が未設定です。apps/web/.env に API のベースURLを設定してください (例: http://localhost:8787)。"
+    );
+  }
+
   /** 認証不要のエンドポイントを <a href> から開くとき用。 */
   const apiUrl = (path: string) => `${apiBase}${path}`;
 

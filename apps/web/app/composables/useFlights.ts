@@ -39,14 +39,30 @@ export function useFlights() {
   const remove = (id: string) =>
     $fetch<{ ok: true }>(apiUrl(`/flights/${id}`), { method: "DELETE", headers: authHeaders() });
 
-  const importCsv = (file: File) => {
+  /**
+   * CSV 取り込み。
+   *
+   * 行ごとの検証エラーは 400 + `{ ok: false, errors }` で返ってくる。
+   * $fetch は非 2xx で例外にしてボディを捨ててしまうため、そのままだと
+   * 画面に出せるのが「400 Bad Request」だけになり、どの行が悪いのか分からない。
+   * ステータスを見て自分で振り分ける。
+   */
+  const importCsv = async (file: File): Promise<ImportResponse> => {
     const fd = new FormData();
     fd.append("file", file);
-    return $fetch<ImportResponse>(apiUrl("/flights/import"), {
+    const res = await $fetch.raw<ImportResponse>(apiUrl("/flights/import"), {
       method: "POST",
       headers: authHeaders(),
       body: fd,
+      ignoreResponseError: true,
     });
+
+    const body = res._data;
+    if (body && "ok" in body) return body;
+
+    // 認証エラーやサーバ障害。ボディは { error: { message } } なので、
+    // そのまま渡せば toErrorMessage が文言を拾える。
+    throw createError({ statusCode: res.status, data: body });
   };
 
   /** サンプルCSVは認証不要。<a href download> から直接開く。 */

@@ -16,8 +16,9 @@ const yearOptions = computed(() => {
 });
 
 const { list } = useFlights();
-const { data } = await useAsyncData("flights-list", () => list({ year: year.value, limit: 500 }));
-watch(year, () => refreshNuxtData("flights-list"));
+const { data } = await useAsyncData("flights-list", () => list({ year: year.value, limit: 500 }), {
+  watch: [year],
+});
 
 const filtered = computed(() => {
   const items = data.value?.items ?? [];

@@ -10,8 +10,15 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      // 本番は NUXT_PUBLIC_API_BASE で上書きする。既定は wrangler dev の待ち受け先。
-      apiBase: "http://localhost:8787",
+      // NUXT_PUBLIC_API_BASE で指定する。既定値を持たせない。
+      // localhost を既定にしておくと、環境変数を入れ忘れた本番ビルドが
+      // ブラウザから http://localhost:8787 を叩きにいき、mixed content で
+      // 黙って全滅する (サーバ側には何のログも残らない)。未設定は useApi() で落とす。
+      //
+      // なお nuxt generate (静的書き出し) では public runtimeConfig が
+      // ビルド時に焼き込まれるため、実行環境で差し替えることはできない。
+      // 静的配信するならビルド時に NUXT_PUBLIC_API_BASE を渡すこと。
+      apiBase: "",
     },
   },
 
