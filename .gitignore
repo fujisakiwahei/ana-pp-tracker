@@ -6,6 +6,10 @@
 .cache
 dist
 
+# Vercel のビルド成果物 (Build Output API)。
+# .wrangler と同じ理由でルートに要る (ESLint の gitignore 連携はここしか読まない)。
+.vercel
+
 # wrangler の dev/build 成果物。
 # apps/api/.gitignore にも書いてあるが、ここにも要る:
 # ESLint の gitignore 連携はルートの .gitignore しか読まないため、

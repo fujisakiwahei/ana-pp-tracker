@@ -70,4 +70,10 @@ export default defineNuxtConfig({
   },
 
   css: ["~/assets/styles/main.scss"],
+
+  // Vercel は「デプロイのルート直下の .vercel/output」を Build Output API として読む。
+  // Nuxt が apps/web に居るので、既定のままだと apps/web/.vercel/output に出力され、
+  // Vercel からは中身の無いデプロイに見える。VERCEL 環境でだけルートへ出す。
+  // (ビルドコマンドとインストールコマンドはリポジトリ直下の vercel.json 側)
+  ...(process.env.VERCEL ? { nitro: { output: { dir: "../../.vercel/output" } } } : {}),
 });
