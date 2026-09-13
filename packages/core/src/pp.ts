@@ -195,13 +195,34 @@ export function getSuggestions(
   return list;
 }
 
-/** 今日の日付 (YYYY-MM-DD)。搭乗日の既定値・過去判定に使う。 */
+/**
+ * このアプリの「今日」と「今年」は日本時間で決める。
+ *
+ * PP の集計年度は日本時間の搭乗日で切られる。実行環境のタイムゾーンに
+ * 引きずられると、Cloudflare Workers (常に UTC) で動く API が
+ * 日本のユーザーに対して9時間ずれた判定をする。
+ *
+ * 以前は todayISO() が UTC (toISOString)、getCurrentYear() がローカル時刻
+ * (getFullYear) と実装が割れていた。前者は「搭乗済PP」の判定に使うので、
+ * 毎朝 9:00 JST まで当日の便が搭乗済に入らず、後者は年明けの9時間だけ
+ * 前年を指す状態だった。
+ */
+const TIME_ZONE = "Asia/Tokyo";
+
+/** 日本時間の今日 (YYYY-MM-DD)。搭乗日の既定値・過去判定に使う。 */
 export function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  // en-CA のロケール書式がちょうど YYYY-MM-DD。
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
 
+/** 日本時間での今年。PP の集計年度はこれで決まる。 */
 export function getCurrentYear(): number {
-  return new Date().getFullYear();
+  return Number(todayISO().slice(0, 4));
 }
 
 /**
