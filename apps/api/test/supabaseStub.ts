@@ -28,7 +28,7 @@ export interface StubCall {
 export interface StubOptions {
   user?: { id: string; email?: string } | null;
   data?: unknown;
-  error?: { message: string } | null;
+  error?: { code?: string; message: string } | null;
   count?: number;
 }
 

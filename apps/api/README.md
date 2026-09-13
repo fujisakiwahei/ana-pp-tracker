@@ -3,7 +3,7 @@
 ANA PP Tracker の API。Hono on Cloudflare Workers。
 
 移行の全体像は [docs/hono-ios-migration.md](../../docs/hono-ios-migration.md) を参照。
-現時点では Nuxt の server routes も並行して動いており、切り替えは Phase 2。
+Web (`apps/web`) は既にこの API を叩いており、Nuxt 側の server routes は削除済み。
 
 ## 起動
 

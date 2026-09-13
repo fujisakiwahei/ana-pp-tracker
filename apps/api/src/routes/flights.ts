@@ -10,8 +10,8 @@ import {
   type ReturnFlightInput,
 } from "@ana/core/schema";
 import { getCurrentYear, PP_RESOLVE_ERROR_MESSAGE, resolvePP } from "@ana/core/pp";
-import { ApiError } from "../lib/errors";
-import { intQuery } from "../lib/query";
+import { ApiError, fromSupabaseError } from "../lib/errors";
+import { rangeQuery, yearQuery } from "../lib/query";
 import { jsonBody } from "../lib/validator";
 import { requireUser } from "../middleware/auth";
 import type { AppEnv } from "../types";
@@ -79,8 +79,14 @@ flights.post("/import", requireUser, async (c) => {
   const db = c.get("db");
 
   const form = await c.req.formData().catch(() => null);
-  const file = form?.get("file");
-  if (!(file instanceof File)) {
+  // "file" を優先しつつ、別のフィールド名で送られてきた File も拾う。
+  // Nuxt 版の `parts.find((p) => p.name === "file" || p.filename)` と同じ挙動。
+  const named = form?.get("file");
+  const file =
+    named instanceof File
+      ? named
+      : [...(form?.values() ?? [])].find((v): v is File => v instanceof File);
+  if (!file) {
     throw new ApiError(400, "CSVファイルが見つかりません");
   }
 
@@ -126,6 +132,12 @@ flights.post("/import", requireUser, async (c) => {
     return c.json({ ok: false as const, errors }, 400);
   }
 
+  // ヘッダ行だけの CSV は空配列の insert になり、200 {inserted: 0} で
+  // 成功したように見えてしまう。取り込む行が無いのは入力の誤りとして扱う。
+  if (rows.length === 0) {
+    throw new ApiError(400, "取り込める行がありません。CSV の中身を確認してください。");
+  }
+
   const { error } = await db.from("flights").insert(rows);
   if (error) throw new ApiError(500, error.message);
 
@@ -136,9 +148,8 @@ flights.get("/", requireUser, async (c) => {
   const user = c.get("user");
   const db = c.get("db");
 
-  const year = intQuery(c.req.query("year"), getCurrentYear());
-  const limit = Math.min(intQuery(c.req.query("limit"), 500), 1000);
-  const offset = intQuery(c.req.query("offset"), 0);
+  const year = yearQuery(c.req.query("year"), getCurrentYear());
+  const { limit, offset } = rangeQuery(c.req.query("limit"), c.req.query("offset"), 500, 1000);
 
   const { data, error, count } = await db
     .from("flights")
@@ -184,7 +195,7 @@ flights.get("/:id", requireUser, async (c) => {
     .eq("user_id", user.id)
     .single();
 
-  if (error) throw new ApiError(404, error.message);
+  if (error) throw fromSupabaseError(error);
   return c.json(asFlightRow(data));
 });
 
@@ -204,7 +215,7 @@ flights.patch("/:id", requireUser, jsonBody(flightInputSchema), async (c) => {
     .select()
     .single();
 
-  if (error) throw new ApiError(500, error.message);
+  if (error) throw fromSupabaseError(error);
   return c.json(asFlightRow(data));
 });
 

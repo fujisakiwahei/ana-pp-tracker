@@ -3,7 +3,7 @@ import { getCurrentYear, todayISO } from "@ana/core/pp";
 import { summarizeYearFlights } from "@ana/core/ppSummary";
 import { ApiError } from "../lib/errors";
 import { requireUser } from "../middleware/auth";
-import { intQuery } from "../lib/query";
+import { yearQuery } from "../lib/query";
 import type { AppEnv } from "../types";
 
 export const stats = new Hono<AppEnv>();
@@ -12,7 +12,7 @@ stats.get("/summary", requireUser, async (c) => {
   const user = c.get("user");
   const db = c.get("db");
 
-  const year = intQuery(c.req.query("year"), getCurrentYear());
+  const year = yearQuery(c.req.query("year"), getCurrentYear());
 
   const { data, error } = await db
     .from("flights")

@@ -91,6 +91,33 @@ describe("POST /flights/import", () => {
     expect(body.errors[0].issues[0].path).toEqual(["pp"]);
   });
 
+  it("ヘッダ行だけの CSV を成功扱いにしない", async () => {
+    const stub = useStub();
+    const res = await upload(HEADER);
+    // 空配列の insert が通ると 200 {inserted: 0} になり、
+    // 間違ったファイルを上げたことに気づけない。
+    expect(res.status).toBe(400);
+    expect(stub.argsOf("insert")).toHaveLength(0);
+  });
+
+  it("file 以外のフィールド名で送られた CSV も受け取る", async () => {
+    useStub();
+    const form = new FormData();
+    form.append(
+      "csv",
+      new File([`${HEADER}\n2026-06-01,NH256,FUK,OKA,economy,simple,,,,,,,,`], "f.csv")
+    );
+    const res = await app.request(
+      "/flights/import",
+      { method: "POST", headers: AUTH_HEADER, body: form },
+      TEST_ENV
+    );
+    expect(await readJson<{ ok: boolean; inserted: number }>(res)).toEqual({
+      ok: true,
+      inserted: 1,
+    });
+  });
+
   it("ファイルが無ければ 400", async () => {
     useStub();
     const res = await app.request(

@@ -19,6 +19,32 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * PostgREST が「該当行なし」を返すときのコード。
+ * .single() は行が無い場合もエラーとして返してくるので、
+ * 本当の障害と取り違えないよう区別する。
+ */
+export const PGRST_NO_ROWS = "PGRST116";
+
+export interface SupabaseError {
+  code?: string;
+  message: string;
+}
+
+/**
+ * Supabase のエラーを ApiError に変換する。
+ * 行が無いだけなら 404、それ以外は 500。
+ *
+ * 以前は GET /flights/:id が「接続断も含めて何でも 404」、
+ * PATCH /flights/:id が「存在しない行も含めて何でも 500」という
+ * 非対称な状態だった。
+ */
+export function fromSupabaseError(error: SupabaseError): ApiError {
+  return error.code === PGRST_NO_ROWS
+    ? new ApiError(404, "Not Found")
+    : new ApiError(500, error.message);
+}
+
 export interface ApiErrorBody {
   error: { message: string; issues?: unknown };
 }

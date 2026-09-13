@@ -99,6 +99,35 @@ describe("GET /flights", () => {
     expect(start).toBe(`${new Date().getFullYear()}-01-01`);
   });
 
+  it("limit と offset が負でも range を反転させない", async () => {
+    const stub = useStub({ data: [] });
+    await app.request("/flights?limit=-5&offset=-3", { headers: AUTH_HEADER }, TEST_ENV);
+    // 反転した range を渡すと PostgREST に弾かれ、入力ミスが 500 になる。
+    const [[start, end]] = stub.argsOf("range") as [[number, number]];
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(end).toBeGreaterThanOrEqual(start);
+  });
+
+  it("limit=0 でも 1 件は引く", async () => {
+    const stub = useStub({ data: [] });
+    await app.request("/flights?limit=0", { headers: AUTH_HEADER }, TEST_ENV);
+    expect(stub.argsOf("range")).toContainEqual([0, 0]);
+  });
+
+  it("指数表記の year も今年に倒す (1e+21-01-01 を投げない)", async () => {
+    const stub = useStub({ data: [] });
+    await app.request("/flights?year=1e21", { headers: AUTH_HEADER }, TEST_ENV);
+    const [[, start]] = stub.argsOf("gte");
+    expect(start).toBe(`${new Date().getFullYear()}-01-01`);
+  });
+
+  it("範囲外の year も今年に倒す", async () => {
+    const stub = useStub({ data: [] });
+    await app.request("/flights?year=99999", { headers: AUTH_HEADER }, TEST_ENV);
+    const [[, start]] = stub.argsOf("gte");
+    expect(start).toBe(`${new Date().getFullYear()}-01-01`);
+  });
+
   it("DB エラーは 500 にして生のメッセージを返す", async () => {
     useStub({ error: { message: "boom" } });
     const res = await app.request("/flights", { headers: AUTH_HEADER }, TEST_ENV);
@@ -182,8 +211,20 @@ describe("POST /flights", () => {
 
 describe("GET/PATCH/DELETE /flights/:id", () => {
   it("見つからなければ 404", async () => {
-    useStub({ error: { message: "No rows found" } });
+    useStub({ error: { code: "PGRST116", message: "No rows found" } });
     const res = await app.request("/flights/f1", { headers: AUTH_HEADER }, TEST_ENV);
+    expect(res.status).toBe(404);
+  });
+
+  it("行が無い以外の DB エラーは 404 で隠さず 500 にする", async () => {
+    useStub({ error: { code: "08006", message: "connection failure" } });
+    const res = await app.request("/flights/f1", { headers: AUTH_HEADER }, TEST_ENV);
+    expect(res.status).toBe(500);
+  });
+
+  it("PATCH で対象が無ければ 500 ではなく 404", async () => {
+    useStub({ error: { code: "PGRST116", message: "No rows found" } });
+    const res = await json("PATCH", "/flights/does-not-exist", VALID_FLIGHT);
     expect(res.status).toBe(404);
   });
 
@@ -214,6 +255,39 @@ describe("GET/PATCH/DELETE /flights/:id", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
     expect(stub.argsOf("delete")).toHaveLength(1);
+  });
+});
+
+describe("エラー応答", () => {
+  it("壊れた JSON ボディは 500 ではなく 400", async () => {
+    useStub();
+    const res = await app.request(
+      "/flights",
+      {
+        method: "POST",
+        headers: { ...AUTH_HEADER, "content-type": "application/json" },
+        body: "{oops",
+      },
+      TEST_ENV
+    );
+    // Hono 自身が投げる HTTPException を拾い損ねると、
+    // クライアントの入力ミスが全部サーバ障害に見える。
+    expect(res.status).toBe(400);
+    expect((await readJson<ErrorBody>(res)).error.message).toBeTruthy();
+  });
+
+  it("CORS_ORIGIN 未設定は黙って全滅させず明示的に落とす", async () => {
+    useStub({ data: [] });
+    const res = await app.request(
+      "/flights",
+      { headers: AUTH_HEADER },
+      {
+        ...TEST_ENV,
+        CORS_ORIGIN: "",
+      }
+    );
+    expect(res.status).toBe(500);
+    expect((await readJson<ErrorBody>(res)).error.message).toContain("CORS_ORIGIN");
   });
 });
 
