@@ -33,6 +33,31 @@ const composed = withNuxt(
       "vue/no-multiple-template-root": "off",
     },
   },
+  {
+    files: ["apps/api/**/*.ts"],
+    rules: {
+      // Service Role キーは RLS を完全にバイパスする。
+      // API は必ずリクエスト元ユーザーの JWT を載せたクライアントで DB を触る。
+      //
+      // Nuxt 時代は `#supabase/server` の serverSupabaseServiceRole を禁止する
+      // ルールがこれを担保していた。server/ を消した時点でその歯止めが無くなり、
+      // Bindings に鍵を1つ足すだけで全ハンドラの RLS が黙って外れる状態になる
+      // (lint も型も既存テストも通ってしまう)。識別子と文字列の両方を弾く。
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Identifier[name=/SERVICE_ROLE|serviceRole/i]",
+          message:
+            "Service Role キーは RLS をバイパスします。ユーザーの JWT を載せた Supabase クライアント (middleware/auth.ts) を使ってください。",
+        },
+        {
+          selector: "Literal[value=/SERVICE_ROLE|service_role/i]",
+          message:
+            "Service Role キーは RLS をバイパスします。ユーザーの JWT を載せた Supabase クライアント (middleware/auth.ts) を使ってください。",
+        },
+      ],
+    },
+  },
   // 整形は Prettier に任せ、競合するスタイル系ルールを無効化する。
   prettier
 );

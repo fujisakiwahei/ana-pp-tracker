@@ -541,17 +541,17 @@ ana-pp-tracker/                     ← pnpm ワークスペースのルート
 - **`ROUTES` のような全大文字は「変更されない定数」を表す慣習**。`packages/core/` 配下のマスタデータはこの命名で統一している。
 - 以前は Nuxt 標準の `shared/` ディレクトリに置いていた。バックエンドを Hono に移す前段として、Nuxt から切り離した独立パッケージにしてある。経緯と移行計画は [docs/hono-ios-migration.md](docs/hono-ios-migration.md)。
 
-### リポジトリ直下のその他のディレクトリ
+### その他のディレクトリ
 
-| パス                   | 役割                                                                                                                                   |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/design-tone/`    | 実装前のデザイン検討用モックアップ（React/JSX）。アプリのビルド対象外。詳細は [docs/design-tone/README.md](docs/design-tone/README.md) |
-| `test/fixtures/`       | CSVインポートの動作確認用サンプル                                                                                                      |
-| `supabase/migrations/` | Supabase のマイグレーションSQL                                                                                                         |
+| パス                      | 役割                                                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/design-tone/`       | 実装前のデザイン検討用モックアップ（React/JSX）。アプリのビルド対象外。詳細は [docs/design-tone/README.md](docs/design-tone/README.md) |
+| `apps/web/test/fixtures/` | CSVインポートの動作確認用サンプル                                                                                                      |
+| `supabase/migrations/`    | Supabase のマイグレーションSQL                                                                                                         |
 
-> アプリのスタイルの正は `app/assets/styles/main.scss`。以前リポジトリ直下にあった `main.css` はそのコンパイル済み出力で、どこからも参照されていなかったため削除し `.gitignore` に登録した。
+> アプリのスタイルの正は `apps/web/app/assets/styles/main.scss`。以前リポジトリ直下にあった `main.css` はそのコンパイル済み出力で、どこからも参照されていなかったため削除し `.gitignore` に登録した。
 
-### 主要設定: `nuxt.config.ts`
+### 主要設定: `apps/web/nuxt.config.ts`
 
 ```ts
 export default defineNuxtConfig({

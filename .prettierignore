@@ -7,6 +7,9 @@ dist
 node_modules
 pnpm-lock.yaml
 
+# wrangler のビルド/dev 成果物 (git では無視しているが prettier は見にいく)
+.wrangler
+
 # デザイン検討用のモックアップ (アプリのビルド対象外)
 design-tone
 
